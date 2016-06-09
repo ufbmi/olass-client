@@ -22,3 +22,5 @@ nosexcover-*
 .coveralls.yml
 coverage.json
 pylint.out
+
+db.sqlite
