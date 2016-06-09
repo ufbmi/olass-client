@@ -1,0 +1,57 @@
+Add the initial tables:
+
+	- version:              store database version numbers
+	- gender:               stores gender options as defined by PCORNet CDM v3.0
+	- race:                 stores race options as defined by PCORNet CDM v3.0
+	- hispanic_ethnicity:   stores ethnicity options as defined by PCORNet CDM v3.0
+	- patient:              stores patient demographic data as well as OneFlorida linkage
+
+
+Note: For `hispanic_ethnicity` table see the relevant documents at:
+
+	- https://www.whitehouse.gov/omb/fedreg_1997standards
+	- http://grants.nih.gov/grants/guide/notice-files/NOT-OD-15-089.html
+	- http://pcornet.org/wp-content/uploads/2014/07/2015-07-29-PCORnet-Common-Data-Model-v3dot0-RELEASE.pdf
+
+
+select * from gender;
++--------+----------------+----------------------------------------------------------------------------+
+| gender | gender_name    | gender_description                                                         |
++--------+----------------+----------------------------------------------------------------------------+
+| A      | Ambiguous      | May be used for individuals who are physically undifferentiaded from birth |
+| F      | Female         |                                                                            |
+| M      | Male           |                                                                            |
+| NI     | No information |                                                                            |
+| OT     | Other          | May ne used for individuals who are undergoing gender re-assignment        |
+| UN     | Unknown        |                                                                            |
++--------+----------------+----------------------------------------------------------------------------+
+
+
+select race, race_name from race;
++------+-------------------------------------------+
+| race | race_name                                 |
++------+-------------------------------------------+
+| 01   | American Indian or Alaska Native          |
+| 02   | Asian                                     |
+| 03   | Black or African American                 |
+| 04   | Native Hawaiian or Other Pacific Islander |
+| 05   | White                                     |
+| 06   | Multiple race                             |
+| 07   | Refuse to answer                          |
+| NI   | No information                            |
+| OT   | Other                                     |
+| UN   | Unknown                                   |
++------+-------------------------------------------+
+
+
+select hispanic_ethnicity, hispanic_ethnicity_name from hispanic_ethnicity;
++--------------------+-------------------------+
+| hispanic_ethnicity | hispanic_ethnicity_name |
++--------------------+-------------------------+
+| N                  | No                      |
+| NI                 | No information          |
+| OT                 | Other                   |
+| R                  | Refuse to answer        |
+| UN                 | Unknown                 |
+| Y                  | Yes                     |
++--------------------+-------------------------+
