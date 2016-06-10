@@ -15,21 +15,21 @@ STATUS_FAIL = '✗'
 
 
 @task
-def list():
+def list(ctx):
     """ Show available tasks """
-    run('inv -l')
+    ctx.run('inv -l')
 
 
 @task
-def prep_develop():
+def prep_develop(ctx):
     """ Install the requirements """
-    run('pip install -r requirements.txt')
+    ctx.run('pip install -r requirements.txt')
     print("==> Pip packages installed:")
-    run('pip freeze')
+    ctx.run('pip freeze')
 
 
 @task
-def init_db(db_name=None, db_type='mysql'):
+def init_db(ctx, db_name=None, db_type='mysql'):
     """ Create the database """
     db_name = db_name if db_name is not None else get_db_name(db_type)
     exists = check_db_exists(db_name, db_type)
@@ -45,14 +45,15 @@ def init_db(db_name=None, db_type='mysql'):
         print("Aborting at user request.")
         sys.exit(1)
 
-    run('sudo mysql    < schema/{}/000/upgrade.sql'.format(db_type))
-    run('sudo mysql {} < schema/{}/001/upgrade.sql'.format(db_name, db_type))
-    run('sudo mysql {} < schema/{}/001/data.sql'.format(db_name, db_type))
+    ctx.run('sudo mysql    < schema/{}/000/upgrade.sql'.format(db_type))
+    ctx.run('sudo mysql {} < schema/{}/001/upgrade.sql'.format(db_name,
+                                                               db_type))
+    ctx.run('sudo mysql {} < schema/{}/001/data.sql'.format(db_name, db_type))
     print("[{}] Done.".format(STATUS_PASS))
 
 
 @task
-def reset_db(db_name=None, db_type='mysql'):
+def reset_db(ctx, db_name=None, db_type='mysql'):
     """ Drop all tables, create empty tables, and add data """
     db_name = db_name if db_name is not None else get_db_name(db_type)
 
@@ -65,41 +66,41 @@ def reset_db(db_name=None, db_type='mysql'):
     else:
         schema_dir = 'schema/sqlserver'
 
-    run('sudo mysql < {}/000/downgrade.sql'.format(schema_dir))
+    ctx.run('sudo mysql < {}/000/downgrade.sql'.format(schema_dir))
     init_db(db_name, db_type)
     print("[{}] Done.".format(STATUS_PASS))
 
 
 @task(aliases=['run'])
-def go():
+def go(ctx):
     """
     Start the app
     """
-    run('python run.py')
+    ctx.run('python run.py')
 
 
 @task
-def test():
+def test(ctx):
     """ Run tests """
-    run('PYTHONPATH="." py.test -v --tb=short -s tests/ --color=yes')
+    ctx.run('PYTHONPATH="." py.test -v --tb=short -s tests/ --color=yes')
 
 
 @task(aliases=['cov'])
-def coverage():
+def coverage(ctx):
     """ Create coverage report """
-    run('PYTHONPATH="." py.test --tb=short -s --cov olass '
+    ctx.run('PYTHONPATH="." py.test --tb=short -s --cov olass '
         ' --cov-report term-missing --cov-report html tests/')
-    run('open htmlcov/index.html')
+    ctx.run('open htmlcov/index.html')
 
 
 @task
-def lint():
-    run("which pylint || pip install pylint")
-    run("pylint -f parseable olass")
+def lint(ctx):
+    ctx.run("which pylint || pip install pylint")
+    ctx.run("pylint -f parseable olass")
 
 
 @task
-def clean():
+def clean(ctx):
     """
     Remove all generated files
     """
