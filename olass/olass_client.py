@@ -16,7 +16,7 @@ from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2.rfc6749.errors import TokenExpiredError
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from olass.models import base
-# import sqlalchemy as db
+import sqlalchemy as db
 import logging
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -73,7 +73,11 @@ class OlassClient():
         log.info("Call get_db_session()")
         url = self.get_db_url()
         log.debug("get_db_session({})".format(url))
-        engine = base.db.create_engine(url, echo=False)
+        engine = db.create_engine(url,
+                                  pool_size=10,
+                                  max_overflow=5,
+                                  pool_recycle=3600,
+                                  echo=False)
         base.init(engine)
         session = base.DBSession()
 
@@ -100,7 +104,7 @@ class OlassClient():
         except TokenExpiredError as exc:
             if attempt < TOKEN_REQUEST_ATTEMPTS:
                 log.warn("Try to get a fresh token: {}".format(exc))
-                return self.get_access_token(self, attempt+1)
+                return self.get_access_token(self, attempt + 1)
             else:
                 log.error("Give up after {} attempts to get a token: {}"
                           .format(TOKEN_REQUEST_ATTEMPTS,
