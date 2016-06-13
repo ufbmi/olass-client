@@ -35,9 +35,9 @@ CREATE TABLE hispanic_ethnicity (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 ;
 
--- This tabWhen the partner populates the initial patient data
+-- When the partner populates the initial patient data
 -- the `linkage_uuid`, and `linkage_added_at` columns are null
-
+-- TODO: check if `pat_mrn` column should be unique key
 CREATE TABLE patient (
     pat_id bigint unsigned NOT NULL AUTO_INCREMENT,
     pat_mrn varchar(255) NOT NULL,
@@ -46,18 +46,19 @@ CREATE TABLE patient (
     gender char(2),
     race char(2),
     hispanic_ethnicity char(2),
-    pat_birth_date date NOT NULL,
-    pat_first_name varchar(255) NOT NULL,
-    pat_last_name varchar(255) NOT NULL,
+    pat_birth_date date             NOT NULL,
+    pat_first_name varchar(255)     NOT NULL,
+    pat_last_name varchar(255)      NOT NULL,
     pat_middle_name varchar(255),
     pat_phone varchar(255),
-    pat_address_line varchar(255),
-    pat_address_city varchar(255) NOT NULL,
+    pat_address_line1 varchar(255),
+    pat_address_line2 varchar(255),
+    pat_address_city varchar(255),
     pat_address_state char(2),
-    pat_address_zip char(5) NOT NULL,
+    pat_address_zip char(10),
     pat_address_country CHAR(2),
  PRIMARY KEY (pat_id),
- UNIQUE KEY (pat_mrn),
+ KEY (pat_mrn),
  KEY (linkage_uuid),
  KEY (linkage_added_at),
  KEY (gender),
