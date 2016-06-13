@@ -67,7 +67,7 @@ def reset_db(ctx, db_name=None, db_type='mysql'):
         schema_dir = 'schema/sqlserver'
 
     ctx.run('sudo mysql < {}/000/downgrade.sql'.format(schema_dir))
-    init_db(db_name, db_type)
+    init_db(ctx, db_name, db_type)
     print("[{}] Done.".format(STATUS_PASS))
 
 
@@ -77,6 +77,14 @@ def go(ctx):
     Start the app
     """
     ctx.run('python run.py')
+
+
+@task()
+def voter(ctx):
+    """
+    Import voter registration data
+    """
+    ctx.run('python run_data_import.py')
 
 
 @task
