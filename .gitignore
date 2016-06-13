@@ -1,4 +1,4 @@
-.DS_Store
+ .DS_Store
 .vagrant/
 *.pyc
 *.pyo
@@ -24,3 +24,4 @@ coverage.json
 pylint.out
 
 db.sqlite
+data/

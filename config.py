@@ -15,3 +15,12 @@ CLIENT_SECRET = 'secret_1'
 # Application endpoints
 TOKEN_URL = 'https://ahc-olass19b.ahc.ufl.edu/oauth/token'
 SAVE_URL = 'https://ahc-olass19b.ahc.ufl.edu/api/save'
+
+SEND_TO_DB = True
+
+DB_HOST = 'localhost'
+DB_PORT = 3306
+
+DB_NAME = 'olassc'
+DB_USER = 'olassc'
+DB_PASS = 'insecurepassword'
