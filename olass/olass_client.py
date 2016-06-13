@@ -15,6 +15,7 @@ from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2.rfc6749.errors import TokenExpiredError
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from olass import utils
 from olass.models import base
 import sqlalchemy as db
 import logging
@@ -53,31 +54,30 @@ class OlassClient():
             root_path=root_path,
             defaults=default_config)
         self.config.from_pyfile(config_file)
-        self.db_session = self.get_db_session(create_tables)
-        self.acess_token = self.get_access_token()
+        self.engine = utils.get_db_engine(self.config)
+        self.session = OlassClient.get_db_session(self.engine, create_tables)
         # self.config.from_object(some_module.DefaultConfig)
 
-    def get_db_url(self):
-        """
-        Generate from the config pieces
-        """
-        # return 'sqlite:///:memory:'
-        return 'sqlite:///db.sqlite'
+    def create_engine(self):
+        self.url = self.get_db_url()
 
-    def get_db_session(self, create_tables=False):
+        try:
+            self.engine = db.create_engine(self.url,
+                                           pool_size=10,
+                                           max_overflow=5,
+                                           pool_recycle=3600,
+                                           echo=False)
+        except TypeError:
+            self.engine = db.create_engine(self.url, echo=False)
+
+    @classmethod
+    def get_db_session(cls, engine, create_tables=False):
         """
         Connect to the database and return a Session object
 
         :param create_tables: boolean used to request table creation
         """
         log.info("Call get_db_session()")
-        url = self.get_db_url()
-        log.debug("get_db_session({})".format(url))
-        engine = db.create_engine(url,
-                                  pool_size=10,
-                                  max_overflow=5,
-                                  pool_recycle=3600,
-                                  echo=False)
         base.init(engine)
         session = base.DBSession()
 
@@ -119,7 +119,8 @@ class OlassClient():
         Retrieve the unprocessed patients, compute hashes,
         and send data to the OLASS server.
         """
-        log.info('Access token: {}'.format(self.acess_token))
+        access_token = self.get_access_token()
+        log.info('Access token: {}'.format(access_token))
         patient_hashes, count = self.get_patient_hashes()
         log.info('Got hashes for [{}] patients'.format(count))
 

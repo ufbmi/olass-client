@@ -3,7 +3,7 @@ Goal: Implement ORM for `patient` table
 """
 import sqlalchemy as db
 from olass.models.base import DeclarativeBase
-# from crud_mixin import CRUDMixin
+from olass.models.crud_mixin import CRUDMixin
 
 __all__ = ['Patient']
 
@@ -33,8 +33,8 @@ __all__ = ['Patient']
 """
 
 
-# class Patient(DeclarativeBase, CRUDMixin):
-class Patient(DeclarativeBase):
+# class Patient(DeclarativeBase):
+class Patient(DeclarativeBase, CRUDMixin):
 
     """
     Store data about the patient

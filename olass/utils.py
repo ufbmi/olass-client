@@ -5,10 +5,15 @@ import logging
 import pandas as pd
 import sqlalchemy as db
 from datetime import datetime
-from urllib import parse
+
 from olass.models.patient import Patient
 
 log = logging.getLogger(__package__)
+FORMAT_US_DATE = "%x"
+FORMAT_US_DATE_TIME = '%x %X'
+FORMAT_DATABASE_DATE = "%Y-%m-%d"
+FORMAT_DATABASE_DATE_TIME = "%Y-%m-%d %H:%M:%S"
+
 LINES_PER_CHUNK = 20000
 
 
@@ -37,22 +42,25 @@ def get_file_reader(file_path, columns, sep=','):
                   "\nError: {}".format(source_columns, exc))
     return reader
 
-
-def get_db_url_sqlserver(db_host, db_port, db_name, db_user, db_pass):
-    """
-    Helper function for creating the "pyodbc" connection string.
-
-    @see http://docs.sqlalchemy.org/en/latest/dialects/mssql.html
-    @see https://code.google.com/p/pyodbc/wiki/ConnectionStrings
-    """
-    params = parse.quote(
-        "Driver={{FreeTDS}};Server={};Port={};"
-        "Database={};UID={};PWD={};"
-        .format(db_host, db_port, db_name, db_user, db_pass))
-    return 'mssql+pyodbc:///?odbc_connect={}'.format(params)
+    # def get_db_url_sqlserver(db_host, db_port, db_name, db_user, db_pass):
+    #     """
+    #     Helper function for creating the "pyodbc" connection string.
+    #
+    #     @see http://docs.sqlalchemy.org/en/latest/dialects/mssql.html
+    #     @see https://code.google.com/p/pyodbc/wiki/ConnectionStrings
+    #     """
+    #     from urllib import parse
+    #     params = parse.quote(
+    #         "Driver={{FreeTDS}};Server={};Port={};"
+    #         "Database={};UID={};PWD={};"
+    #         .format(db_host, db_port, db_name, db_user, db_pass))
+    #     return 'mssql+pyodbc:///?odbc_connect={}'.format(params)
 
 
 def get_db_url_mysql(config):
+    if 'DB_URL_TESTING' in config:
+        return config['DB_URL_TESTING']
+
     return 'mysql+mysqlconnector://{}:{}@{}/{}' \
         .format(config['DB_USER'],
                 config['DB_PASS'],
@@ -65,15 +73,21 @@ def get_db_engine(config):
     """
     db_name = config['DB_NAME']
     url = get_db_url_mysql(config)
-    engine = db.create_engine(url,
-                              pool_size=10,
-                              max_overflow=5,
-                              pool_recycle=3600,
-                              echo=False)
+
+    try:
+        engine = db.create_engine(url,
+                                  pool_size=10,
+                                  max_overflow=5,
+                                  pool_recycle=3600,
+                                  echo=False)
+    except TypeError as exc:
+        log.warn("Got exc: {}".format(exc))
+        engine = db.create_engine(url, echo=False)
+
     try:
         engine.execute("USE {}".format(db_name))
     except db.exc.OperationalError:
-        print('Database {} does not exist.'.format(db_name))
+        log.warn('Database {} does not exist.'.format(db_name))
     return engine
 
 
@@ -87,15 +101,16 @@ def serialize_data_frame(config, df, entity):
     return result
 
 
-def _format_date(val, fmt):
+def format_date_as_string(val, fmt='%m-%d-%Y'):
     """
+    :rtype str:
+    :return the input value formatted as '%Y-%m-%d'
+
     :param val: the input string for date
     :param fmt: the input format for the date
     """
     if not val:
         return None
-
-    fmt_out = '%Y-%m-%d'
 
     try:
         d = datetime.strptime(val, fmt)
@@ -103,7 +118,24 @@ def _format_date(val, fmt):
         log.warning("Problem formatting date: {} {}".format(val, fmt))
         return None
 
-    return d.strftime(fmt_out)
+    return d.strftime(FORMAT_DATABASE_DATE)
+
+
+def format_date(val, fmt='%m-%d-%Y'):
+    """
+    Transform the input string to a datetime object
+
+    :param val: the input string for date
+    :param fmt: the input format for the date
+    """
+    date = None
+
+    try:
+        date = datetime.strptime(val, fmt)
+    except Exception:
+        log.warning("Problem formatting date: {} {}".format(val, fmt))
+
+    return date
 
 
 def process_frame(df_source, columns, config):
@@ -118,7 +150,7 @@ def process_frame(df_source, columns, config):
         # log.info("Parsing df[{}] = .. from {}".format(col, source_col))
         if 'pat_birth_date' == col:
             df[col] = df_source[source_col].map(
-                lambda x: _format_date(x, fmt='%m/%d/%Y'))
+                lambda x: format_date_as_string(x, fmt='%m/%d/%Y'))
         else:
             df[col] = df_source[source_col]
 

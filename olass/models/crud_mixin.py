@@ -2,6 +2,7 @@
 Goal: simplify the code when interacting with entities
 """
 import sqlalchemy as db
+from olass.models.base import get_session
 
 
 class CRUDMixin():
@@ -20,7 +21,7 @@ class CRUDMixin():
 
     @classmethod
     def create(cls, **kwargs):
-        """ Helper for session.add() + session.commit() """
+        """ Helper for add() + commit() """
         instance = cls(**kwargs)
         return instance.save()
 
@@ -30,11 +31,13 @@ class CRUDMixin():
         return self.save() if commit else self
 
     def save(self, commit=True):
-        db.session.add(self)
+        session = get_session()
+        session.add(self)
         if commit:
-            db.session.commit()
+            session.commit()
         return self
 
     def delete(self, commit=True):
-        db.session.delete(self)
-        return commit and db.session.commit()
+        session = get_session()
+        session.delete(self)
+        return commit and session.commit()
