@@ -1,3 +1,5 @@
 
 requests-oauthlib
 invoke
+pandas
+mysql-connector
