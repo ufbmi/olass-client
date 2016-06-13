@@ -1,13 +1,8 @@
 """
 Goal: implement the base class for models
 """
-import sqlalchemy as db  # NOQA
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext import declarative
-
-# import sqlalchemy.sql as sasql
-# import sqlalchemy.ext.declarative as sad
-# from sqlalchemy.ext.hybrid import hybrid_property
 
 maker = sessionmaker(autoflush=True, autocommit=False)
 DBSession = scoped_session(maker)
@@ -42,4 +37,4 @@ def init(engine):
     DBSession.configure(bind=engine)
 
 # remember to define __ALL__ in each entity we define
-from olass.models.patient import Patient  # NOQA
+from olass.models.patient import *  # NOQA
