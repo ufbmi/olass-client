@@ -4,3 +4,4 @@ invoke
 pandas
 mysql-connector
 pytest
+pytest-cov
