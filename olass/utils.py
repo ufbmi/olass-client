@@ -1,19 +1,33 @@
 """
-Goal: store utility function
+Goal: store utility functions
 """
+import sys
+import unicodedata
 import logging
 import pandas as pd
 import sqlalchemy as db
+from hashlib import sha256
 from datetime import datetime
 from olass.models.patient import Patient
 
 log = logging.getLogger(__package__)
 # FORMAT_US_DATE = "%x"
 # FORMAT_US_DATE_TIME = '%x %X'
-# FORMAT_DATABASE_DATE = "%Y-%m-%d"
-# FORMAT_DATABASE_DATE_TIME = "%Y-%m-%d %H:%M:%S"
+FORMAT_DATABASE_DATE = "%Y-%m-%d"
+FORMAT_DATABASE_DATE_TIME = "%Y-%m-%d %H:%M:%S"
 
 LINES_PER_CHUNK = 20000
+
+# table of punctuation characters + space
+tbl = dict.fromkeys(i for i in range(sys.maxunicode)
+                    if unicodedata.category(chr(i)).startswith('P') or
+                    chr(i) in [' '])
+
+
+def prepare_for_hashing(text):
+    if not text:
+        return ''
+    return text.translate(tbl).lower()
 
 
 def get_file_reader(file_path, columns, sep=','):
@@ -102,16 +116,23 @@ def serialize_data_frame(config, df, entity):
     return result
 
 
-# def format_date_as_string(val, fmt='%m-%d-%Y'):
-#     """
-#     :rtype str:
-#     :return the input value formatted as '%Y-%m-%d'
-#
-#     :param val: the input string for date
-#     :param fmt: the input format for the date
-#     """
-#     d = format_date(val, fmt)
-#     return d.strftime(FORMAT_DATABASE_DATE)
+def format_date_as_string(val, fmt='%m-%d-%Y'):
+    """
+    :rtype str:
+    :return the input value formatted as '%Y-%m-%d'
+
+    :param val: datetime or string
+    :param fmt: the input format for the date
+    """
+    if isinstance(val, datetime):
+        return val.strftime(FORMAT_DATABASE_DATE)
+
+    date = format_date(val, fmt)
+
+    if not date:
+        return ''
+
+    return date.strftime(FORMAT_DATABASE_DATE)
 
 
 def format_date(val, fmt='%m-%d-%Y'):
@@ -210,3 +231,13 @@ def import_voter_data(file_path, columns, out_file, config):
         log.info('Wrote result file: {}'.format(out_file))
     else:
         log.error("Failed to write file: {}".format(out_file))
+
+
+def apply_sha256(val):
+    """ Compute sha256 sum
+    :param val: the input string
+    :rtype string: the sha256 hexdigest
+    """
+    m = sha256()
+    m.update(val.encode('utf-8'))
+    return m.hexdigest()
