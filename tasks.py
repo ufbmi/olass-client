@@ -103,6 +103,7 @@ def coverage(ctx):
 
 @task
 def lint(ctx):
+    """ Show the lint score """
     ctx.run("which pylint || pip install pylint")
     ctx.run("pylint -f parseable olass")
 
@@ -112,9 +113,10 @@ def clean(ctx):
     """
     Remove all generated files
     """
-    run('find . -type f -name "*.pyc" -print | xargs rm -f')
-    run('rm -rf htmlcov/ .coverage pylint.out')
-    run('rm -rf .tox/*')
+    ctx.run('find . -type f -name "*.pyc" -print | xargs rm -f')
+    ctx.run('rm -rf htmlcov/ .coverage pylint.out')
+    ctx.run('rm -rf .tox/* .ropeproject/')
+    ctx.run('rm -f db.sqlite')
 
 
 if __name__ == '__main__':
