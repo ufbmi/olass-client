@@ -1,18 +1,22 @@
 """
-Goal: Extend the base test class by inserting sample rows in the database
+Goal: Test CRUD actions (insert/update/delete)
 
 Authors:
      Andrei Sura <sura.andrei@gmail.com>
 """
+import logging
 # from mock import patch
 # from hashlib import sha256
-# from binascii import unhexlify
-# from binascii import hexlify
-# from olass import utils
-# from datetime import datetime
+# from binascii import unhexlify, hexlify
 from base_test import BaseTestCase
 from olass import utils
 from olass.models.patient import Patient
+
+lformat = '%(name)s.%(levelname)s ' \
+    '- %(filename)s+%(lineno)d: %(message)s'
+logging.basicConfig(format=lformat, level=logging.INFO)
+log = logging.getLogger(__name__)
+
 
 class TestPatient(BaseTestCase):
 
@@ -23,8 +27,6 @@ class TestPatient(BaseTestCase):
         self.create_patients()
 
     def create_patients(self):
-        # when = datetime.now()
-        # when.replace(microsecond=0)
         when = utils.format_date('01-01-1950')
         p1 = Patient.create(
             pat_mrn=1,
@@ -45,6 +47,15 @@ class TestPatient(BaseTestCase):
         self.assertEquals("First", p.pat_first_name)
         self.assertEquals("Last", p.pat_last_name)
 
-        # p2 = Patient.query.get_by_id(1)
-        # self.assertIsNotNone(p)
-        # print("Got: {}".format(p2))
+        p2 = Patient.get_by_id(1)
+        self.assertIsNotNone(p2)
+        log.info("Got patient: {}".format(p2))
+
+        p2.update(pat_first_name='updated', pat_last_name='')
+        p2 = Patient.get_by_id(1)
+        self.assertEquals("updated", p2.pat_first_name)
+        self.assertEquals("", p2.pat_last_name)
+
+        p2.delete()
+        p2 = Patient.get_by_id(1)
+        self.assertIsNone(p2)

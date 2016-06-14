@@ -5,14 +5,13 @@ import logging
 import pandas as pd
 import sqlalchemy as db
 from datetime import datetime
-
 from olass.models.patient import Patient
 
 log = logging.getLogger(__package__)
-FORMAT_US_DATE = "%x"
-FORMAT_US_DATE_TIME = '%x %X'
-FORMAT_DATABASE_DATE = "%Y-%m-%d"
-FORMAT_DATABASE_DATE_TIME = "%Y-%m-%d %H:%M:%S"
+# FORMAT_US_DATE = "%x"
+# FORMAT_US_DATE_TIME = '%x %X'
+# FORMAT_DATABASE_DATE = "%Y-%m-%d"
+# FORMAT_DATABASE_DATE_TIME = "%Y-%m-%d %H:%M:%S"
 
 LINES_PER_CHUNK = 20000
 
@@ -101,24 +100,16 @@ def serialize_data_frame(config, df, entity):
     return result
 
 
-def format_date_as_string(val, fmt='%m-%d-%Y'):
-    """
-    :rtype str:
-    :return the input value formatted as '%Y-%m-%d'
-
-    :param val: the input string for date
-    :param fmt: the input format for the date
-    """
-    if not val:
-        return None
-
-    try:
-        d = datetime.strptime(val, fmt)
-    except Exception:
-        log.warning("Problem formatting date: {} {}".format(val, fmt))
-        return None
-
-    return d.strftime(FORMAT_DATABASE_DATE)
+# def format_date_as_string(val, fmt='%m-%d-%Y'):
+#     """
+#     :rtype str:
+#     :return the input value formatted as '%Y-%m-%d'
+#
+#     :param val: the input string for date
+#     :param fmt: the input format for the date
+#     """
+#     d = format_date(val, fmt)
+#     return d.strftime(FORMAT_DATABASE_DATE)
 
 
 def format_date(val, fmt='%m-%d-%Y'):
@@ -150,7 +141,7 @@ def process_frame(df_source, columns, config):
         # log.info("Parsing df[{}] = .. from {}".format(col, source_col))
         if 'pat_birth_date' == col:
             df[col] = df_source[source_col].map(
-                lambda x: format_date_as_string(x, fmt='%m/%d/%Y'))
+                lambda x: format_date(x, fmt='%m/%d/%Y'))
         else:
             df[col] = df_source[source_col]
 

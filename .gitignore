@@ -25,3 +25,4 @@ pylint.out
 
 db.sqlite
 data/
+tests/voter_out.csv
