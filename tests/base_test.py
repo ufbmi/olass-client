@@ -4,8 +4,10 @@ so we can run data tests
 """
 import unittest
 from mock import patch
+from olass import utils
 from olass.models import base
 from olass.olass_client import OlassClient
+from olass.models.patient import Patient
 
 
 def dummy_get_access_token(*args, **kwargs):
@@ -22,11 +24,21 @@ class BaseTestCase(unittest.TestCase):
         super(BaseTestCase, self).setUp()
         self.app = OlassClient(config_file='config_tests.py',
                                create_tables=True)
-        self.app.run()
         self.session = self.app.session
+        self.create_patients()
+        self.app.run()
 
     def tearDown(self):
         """ remove all tables """
         super(BaseTestCase, self).tearDown()
         base.metadata.drop_all(self.app.engine)
         # self.app.session.remove()
+
+    def create_patients(self):
+        when = utils.format_date('01-01-1950')
+        Patient.create(
+            pat_mrn=1,
+            pat_birth_date=when,
+            pat_first_name='First',
+            pat_last_name='Last'
+        )

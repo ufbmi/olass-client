@@ -17,3 +17,15 @@ class TestUtils(BaseTestCase):
             'pat_last_name': 'last_name',
         }
         utils.import_voter_data(file_in, columns, file_out, self.app.config)
+
+    def test_prepare_for_hashing(self):
+        """Verify that punctuation characters are removed """
+        subjects = {
+            '1': {'in': 'AbC xyZ', 'out': 'abcxyz'},
+            '2': {'in': 'A&B,C.D:E;F-G}{H!?I@#', 'out': 'abcdefghi'},
+            '3': {'in': 'A^B|C', 'out': 'a^b|c'},
+        }
+
+        for case, data in subjects.items():
+            self.assertEqual(data.get('out'),
+                             utils.prepare_for_hashing(data.get('in')))

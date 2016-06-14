@@ -6,8 +6,6 @@ Authors:
 """
 import logging
 # from mock import patch
-# from hashlib import sha256
-# from binascii import unhexlify, hexlify
 from base_test import BaseTestCase
 from olass import utils
 from olass.models.patient import Patient
@@ -24,17 +22,6 @@ class TestPatient(BaseTestCase):
 
     def setUp(self):
         super(TestPatient, self).setUp()
-        self.create_patients()
-
-    def create_patients(self):
-        when = utils.format_date('01-01-1950')
-        p1 = Patient.create(
-            pat_mrn=1,
-            pat_birth_date=when,
-            pat_first_name='First',
-            pat_last_name='Last'
-        )
-        self.assertIsNotNone(p1.id)
 
     def test_read_patients(self):
         """
