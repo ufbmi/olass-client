@@ -66,11 +66,13 @@ def get_db_url_mysql(config):
                 config['DB_HOST'],
                 config['DB_NAME'])
 
+
 def get_db_engine(config):
     """
     @see http://docs.sqlalchemy.org/en/latest/core/connections.html
     """
-    db_name = config['DB_NAME']
+    # TODO: add support for connecting to sqlserver
+    db_name = config.get('DB_NAME')
     url = get_db_url_mysql(config)
 
     try:
@@ -80,13 +82,13 @@ def get_db_engine(config):
                                   pool_recycle=3600,
                                   echo=False)
     except TypeError as exc:
-        log.warn("Got exc: {}".format(exc))
+        log.warn("Got exc from db.create_engine(): {}".format(exc))
         engine = db.create_engine(url, echo=False)
 
     try:
         engine.execute("USE {}".format(db_name))
     except db.exc.OperationalError:
-        log.warn('Database {} does not exist.'.format(db_name))
+        log.warn('Cannot select [{}] database.'.format(db_name))
     return engine
 
 
@@ -154,8 +156,9 @@ def process_frame(df_source, columns, config):
 
 def process_reader_data(reader, columns, config):
     """
-    TODO: Make it process in paralel
+    For each chunk of the original file call `meth`:process_frame
     """
+    # TODO: Use paralel processing
     frames = []
 
     for index, df_source in enumerate(reader):
