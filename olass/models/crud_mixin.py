@@ -16,7 +16,10 @@ class CRUDMixin():
         if any(
             (isinstance(id, str) and id.isdigit(),
              isinstance(id, (int, float))),):
-            return cls.query.get(int(id))
+            session = get_session()
+            # return cls.query.get(int(id))
+            # return session.query(cls).filter_by(id=int(id)).one()
+            return session.query(cls).get(int(id))
         return None
 
     @classmethod

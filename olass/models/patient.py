@@ -33,9 +33,7 @@ __all__ = ['Patient']
 """
 
 
-# class Patient(DeclarativeBase):
-class Patient(DeclarativeBase, CRUDMixin):
-
+class Patient(CRUDMixin, DeclarativeBase):
     """
     Store data about the patient
     """
