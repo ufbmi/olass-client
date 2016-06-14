@@ -5,7 +5,10 @@ json requests to OLASS server.
 @authors:
   Andrei Sura <sura.andrei@gmail.com>
 
-https://github.com/requests/requests-oauthlib/blob/master/requests_oauthlib/oauth2_session.py # NOQA
+@see:
+    http://docs.sqlalchemy.org/en/latest/orm/tutorial.html#querying
+    http://docs.sqlalchemy.org/en/latest/orm/contextual.html
+    https://github.com/requests/requests-oauthlib/blob/master/requests_oauthlib/oauth2_session.py # NOQA
 """
 import os
 import sys
@@ -16,7 +19,9 @@ from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2.rfc6749.errors import TokenExpiredError
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from olass import utils
+from olass import rules
 from olass.models import base
+from olass.models.patient import Patient
 import logging
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -101,7 +106,17 @@ class OlassClient():
         return token
 
     def get_patient_hashes(self):
-        return ({}, 0)
+
+        # Find patients without `linkage_uuid`
+        patients = self.session.query(Patient).filter(
+            Patient.pat_birth_date.isnot(None),
+            Patient.pat_first_name.isnot(None),
+            Patient.pat_last_name.isnot(None),
+            Patient.linkage_uuid.is_(None)
+        ).limit(10)
+
+        hashes = rules.prepare_patients(patients, rules.RULES_MAP)
+        return (hashes, len(hashes))
 
     def run(self):
         """
@@ -113,5 +128,5 @@ class OlassClient():
         patient_hashes, count = self.get_patient_hashes()
         log.info('Got hashes for [{}] patients'.format(count))
 
-        for id, patient in patient_hashes.items():
+        for id, patient in enumerate(patient_hashes):
             print("{}: {}".format(id, patient))
