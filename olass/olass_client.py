@@ -58,18 +58,6 @@ class OlassClient():
         self.session = OlassClient.get_db_session(self.engine, create_tables)
         # self.config.from_object(some_module.DefaultConfig)
 
-    def create_engine(self):
-        self.url = self.get_db_url()
-
-        try:
-            self.engine = db.create_engine(self.url,
-                                           pool_size=10,
-                                           max_overflow=5,
-                                           pool_recycle=3600,
-                                           echo=False)
-        except TypeError:
-            self.engine = db.create_engine(self.url, echo=False)
-
     @classmethod
     def get_db_session(cls, engine, create_tables=False):
         """
