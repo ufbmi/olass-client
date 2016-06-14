@@ -1,7 +1,8 @@
 
-requests-oauthlib
 invoke
-pandas
+mock
 mysql-connector
-pytest
+pandas
 pytest-cov
+pytest
+requests-oauthlib
