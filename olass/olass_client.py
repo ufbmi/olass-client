@@ -17,7 +17,6 @@ from oauthlib.oauth2.rfc6749.errors import TokenExpiredError
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from olass import utils
 from olass.models import base
-import sqlalchemy as db
 import logging
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -79,24 +78,26 @@ class OlassClient():
         Connects to the TOKEN_URL endpoint to retrieve a token.
         """
         log.info('Call get_access_token(attempt={})'.format(attempt))
-        log.info('TOKEN_URL: {}'.format(self.config['TOKEN_URL']))
-        client = BackendApplicationClient(self.config['CLIENT_ID'])
+        url = self.config.get('TOKEN_URL')
+        client_id = self.config.get('CLIENT_ID')
+        client_secret = self.config.get('CLIENT_SECRET')
+        log.info('TOKEN_URL: {}'.format(url))
+        client = BackendApplicationClient(client_id)
         olass = OAuth2Session(client=client)
 
         try:
             token = olass.fetch_token(
-                token_url=self.config['TOKEN_URL'],
-                client_id=self.config['CLIENT_ID'],
-                client_secret=self.config['CLIENT_SECRET'],
-                verify=self.config['VERIFY_SSL_CERT'])
+                token_url=url,
+                client_id=client_id,
+                client_secret=client_secret,
+                verify=self.config.get('VERIFY_SSL_CERT', False))
         except TokenExpiredError as exc:
             if attempt < TOKEN_REQUEST_ATTEMPTS:
                 log.warn("Try to get a fresh token: {}".format(exc))
                 return self.get_access_token(self, attempt + 1)
             else:
                 log.error("Give up after {} attempts to get a token: {}"
-                          .format(TOKEN_REQUEST_ATTEMPTS,
-                                  self.config['TOKEN_URL']))
+                          .format(TOKEN_REQUEST_ATTEMPTS, url))
         return token
 
     def get_patient_hashes(self):
