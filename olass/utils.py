@@ -8,6 +8,7 @@ import pandas as pd
 import sqlalchemy as db
 from hashlib import sha256
 from datetime import datetime
+from datetime import date
 from olass.models.patient import Patient
 
 log = logging.getLogger(__package__)
@@ -124,15 +125,15 @@ def format_date_as_string(val, fmt='%m-%d-%Y'):
     :param val: datetime or string
     :param fmt: the input format for the date
     """
-    if isinstance(val, datetime):
-        return val.strftime(FORMAT_DATABASE_DATE)
+    if isinstance(val, date):
+        return val.strftime(fmt)
 
-    date = format_date(val, fmt)
+    da = format_date(val, fmt)
 
-    if not date:
+    if not da:
         return ''
 
-    return date.strftime(FORMAT_DATABASE_DATE)
+    return da.strftime(FORMAT_DATABASE_DATE)
 
 
 def format_date(val, fmt='%m-%d-%Y'):
@@ -146,8 +147,9 @@ def format_date(val, fmt='%m-%d-%Y'):
 
     try:
         date = datetime.strptime(val, fmt)
-    except Exception:
-        log.warning("Problem formatting date: {} {}".format(val, fmt))
+    except Exception as exc:
+        log.warning("Problem formatting date: {} - {} due: {}"
+                    .format(val, fmt, exc))
 
     return date
 
