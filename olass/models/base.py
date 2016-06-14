@@ -29,28 +29,6 @@ class ReprBase():
                        if not key.startswith('_')]))
 
 
-# class _QueryProperty(object):
-#     def __init__(self, sa):
-#         self.sa = sa
-#
-#     def __get__(self, obj, type):
-#         try:
-#             mapper = orm.class_mapper(type)
-#             if mapper:
-#                 # return type.query_class(mapper, session=self.sa.session())
-#                 # return orm.Query(mapper, session=self.sa.session())
-#                 return orm.Query(mapper...
-#         except UnmappedClassError:
-#             return None
-
-
-# def make_declarative_base(model, metadata=None):
-#     base = declarative.declarative_base(cls=model, name='Model')
-#     # base.query = _QueryProperty(self)
-#     # base.query = _QueryProperty(orm.Query)
-#     return base
-
-
 def init(engine):
     """
     Call this method before using any of the ORM classes.
@@ -68,7 +46,6 @@ def get_session():
 
 
 DeclarativeBase = declarative.declarative_base(cls=ReprBase)
-# DeclarativeBase = make_declarative_base(model=ReprBase)
 metadata = DeclarativeBase.metadata
 
 # remember to define __ALL__ in each entity we define
