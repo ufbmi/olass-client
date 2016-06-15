@@ -1,14 +1,14 @@
 """
-Goal: Store logig related to hashing data according to
+Goal: Store logic related to hashing data according to
 predefined rules.
 
 Authors:
      Andrei Sura <sura.andrei@gmail.com>
 """
-# from binascii import unhexlify
-# from binascii import hexlify
+import logging
 from olass import utils
 
+log = logging.getLogger(__package__)
 
 # _1 First Name + Last Name + DOB + Zip
 RULE_CODE_F_L_D_Z = 'F_L_D_Z'  # NOQA
@@ -38,18 +38,20 @@ RULES_MAP = {
 }
 
 
-def get_patient_hashes(patient, rules_map):
+def get_hashes(patient, rules_map):
     """
     Get a dictionary of unhexlified hashes for a patient
     """
     hashes = {}
 
+    count = 0
+
     for rule, pattern in rules_map.items():
+        count = count + 1
         raw = pattern.format(patient)
-        print("Raw {}: {} ".format(rule, raw))
-        # chunk = unhexlify(utils.apply_sha256(raw))
         chunk = utils.apply_sha256(raw)
-        hashes[rule] = chunk
+        log.debug("Rule {} raw data: {}, hashed: {}".format(rule, raw, chunk))
+        hashes[str(count)] = chunk
 
     return hashes
 
@@ -89,12 +91,12 @@ def prepare_patients(patients, rules_map):
                      to retrieve `linkage_uuid` from OLASS server
     :return ?:
     """
-    hashes = []
+    hashes = {}
 
-    for patient in patients:
+    for count, patient in enumerate(patients):
         norm_patient = NormalizedPatient(patient)
-        pat_hashes = get_patient_hashes(norm_patient, rules_map)
-        hashes.append(pat_hashes)
-        print("MRN: {} got hashes: \n{}".format(patient.pat_mrn, pat_hashes))
+        pat_hashes = get_hashes(norm_patient, rules_map)
+        hashes[str(count)] = pat_hashes
+        # log.debug("MRN: {} hashes: \n{}".format(patient.pat_mrn, pat_hashes))
 
     return hashes
