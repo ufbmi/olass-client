@@ -6,6 +6,7 @@ import unicodedata
 import logging
 import pandas as pd
 import sqlalchemy as db
+from itertools import zip_longest, islice, chain
 from hashlib import sha256
 from datetime import datetime
 from datetime import date
@@ -243,3 +244,40 @@ def apply_sha256(val):
     m = sha256()
     m.update(val.encode('utf-8'))
     return m.hexdigest()
+
+
+def list_grouper(iterable, n, fillvalue=None):
+    """
+    Collect data into fixed-length chunks or blocks.
+    From: https://docs.python.org/2.7/library/itertools.html#recipes
+    Example: grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
+
+    zip_longest: Make an iterator that aggregates elements from each of the
+    iterables. If the iterables are of uneven length, missing values are
+    filled-in with fillvalue. Iteration continues until the longest iterable
+    is exhausted.
+    """
+    args = [iter(iterable)] * n
+    return zip_longest(*args, fillvalue=fillvalue)
+
+
+# def dict_grouper_memory(iterable, n):
+#     chunks = [iter(iterable.items())] * n
+#     generators = (dict(filter(None, v)) for v in zip_longest(*chunks))
+#     return generators
+
+
+def dict_grouper(iterable, n):
+    """
+    Stream the elements of the the dictionary in groups of "n".
+    @see http://programeveryday.com/post/using-python-itertools-to-save-memory/
+    The chain function can take any number of iterables and will return a new
+    iterable which combines the passed in iterables.
+
+    : rtype itertools.chain:
+    """
+    sourceiter = iter(iterable.items())
+
+    while True:
+        group_iter = islice(sourceiter, n)
+        yield chain([next(group_iter)], group_iter)

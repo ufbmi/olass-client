@@ -26,6 +26,7 @@ class BaseTestCase(unittest.TestCase):
                                create_tables=True)
         self.session = self.app.session
         self.create_patients()
+        # TODO: move this line to a dedicated test
         self.app.run()
 
     def tearDown(self):
