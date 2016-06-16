@@ -47,11 +47,11 @@ def get_hashes(patient, rules_map):
     count = 0
 
     for rule, pattern in rules_map.items():
-        count = count + 1
         raw = pattern.format(patient)
         chunk = utils.apply_sha256(raw)
         log.debug("Rule {} raw data: {}, hashed: {}".format(rule, raw, chunk))
         hashes[str(count)] = chunk
+        count = count + 1
 
     return hashes
 
@@ -82,6 +82,13 @@ class NormalizedPatient():
             pat.pat_address_zip
         )
 
+    def __repr__(self):
+        return "NormalizedPatient <pat_birth_date: {0.pat_birth_date}, " \
+            "pat_first_name: {0.pat_first_name}, " \
+            "pat_last_name: {0.pat_last_name}, " \
+            "pat_address_city: {0.pat_address_city}, " \
+            "pat_address_zip: {0.pat_address_zip}>".format(self)
+
 
 def prepare_patients(patients, rules_map):
     """
@@ -97,6 +104,7 @@ def prepare_patients(patients, rules_map):
         norm_patient = NormalizedPatient(patient)
         pat_hashes = get_hashes(norm_patient, rules_map)
         hashes[str(count)] = pat_hashes
+        log.info("Hashing: {} \n{}".format(norm_patient, pat_hashes))
         # log.debug("MRN: {} hashes: \n{}".format(patient.pat_mrn, pat_hashes))
 
     return hashes
