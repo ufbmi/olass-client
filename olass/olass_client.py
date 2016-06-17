@@ -109,24 +109,30 @@ class OlassClient():
     def get_patient_hashes(session):
         """
         Find patients without `linkage_uuid` and hash their data
+
+        : return patient_map, hashes
         """
         # TODO: the rules for finding patients need to be configurable
-        # TODO: should we implement pagination here?
         patients = session.query(Patient).filter(
             Patient.pat_birth_date.isnot(None),
             Patient.pat_first_name.isnot(None),
             Patient.pat_last_name.isnot(None),
             Patient.linkage_uuid.is_(None)
-        ).limit(1500)
-        hashes = rules.prepare_patients(patients, rules.RULES_MAP)
-        return hashes
+        ).limit(2)
+        return rules.prepare_patients(patients, rules.RULES_MAP)
 
     @staticmethod
-    def save_response_json(hashes, json_data):
-        print(json_data)
+    def save_response_json(patient_map, json_data):
+        """
+
+        """
+        data = json_data.get('data')
+
+        for i, id in patient_map.items():
+            print("{}: {} - {}".format(i, id, data.get(i).get('uuid')))
 
     @staticmethod
-    def send_hashes_to_server(config, hashes, access_token):
+    def send_hashes_to_server(config, patient_map, hashes, access_token):
         """
         Send the specified dictionary to the OLASS server
 
@@ -134,6 +140,7 @@ class OlassClient():
         :return True: if all data was sent to the server and response
                     saved to the local database
         """
+        # TODO: should we implement pagination here?
         success = False
         url = config.get('SAVE_URL')
         log.debug("Sending hashes for [{}] patients to [{}]"
@@ -147,7 +154,7 @@ class OlassClient():
             json_data = json.dumps({'data': hashes},
                                    indent=2,
                                    sort_keys=True)
-            print(json_data)
+            log.debug(json_data)
             headers = {'Content-Type': 'application/json'}
             response = olass.post(url,
                                   data=json_data.encode('utf-8'),
@@ -155,7 +162,7 @@ class OlassClient():
                                   verify=config.get('VERIFY_SSL_CERT', False),
                                   )
             response_json = response.json()
-            OlassClient.save_response_json(hashes, response_json)
+            OlassClient.save_response_json(patient_map, response_json)
             success = True
         except Exception as exc:
             log.error("Failed due: {}".format(exc))
@@ -168,9 +175,11 @@ class OlassClient():
         """
         access_token = self.get_access_token()
         log.info('Access token: {}'.format(access_token))
-        patient_hashes = OlassClient.get_patient_hashes(self.session)
+        patient_map, patient_hashes = OlassClient.get_patient_hashes(
+            self.session)
         log.info('Got hashes for [{}] patients'.format(len(patient_hashes)))
         done = OlassClient.send_hashes_to_server(self.config,
+                                                 patient_map,
                                                  patient_hashes,
                                                  access_token)
         if done:

@@ -43,7 +43,6 @@ def get_hashes(patient, rules_map):
     Get a dictionary of unhexlified hashes for a patient
     """
     hashes = {}
-
     count = 0
 
     for rule, pattern in rules_map.items():
@@ -99,12 +98,14 @@ def prepare_patients(patients, rules_map):
     :return ?:
     """
     hashes = {}
+    patient_map = {}
 
     for count, patient in enumerate(patients):
         norm_patient = NormalizedPatient(patient)
         pat_hashes = get_hashes(norm_patient, rules_map)
         hashes[str(count)] = pat_hashes
+        patient_map[str(count)] = patient.id
         log.info("Hashing: {} \n{}".format(norm_patient, pat_hashes))
         # log.debug("MRN: {} hashes: \n{}".format(patient.pat_mrn, pat_hashes))
 
-    return hashes
+    return patient_map, hashes
