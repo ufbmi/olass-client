@@ -29,18 +29,22 @@ class CRUDMixin():
         return instance.save()
 
     def update(self, commit=True, **kwargs):
+        """ update object instance """
         for attr, value in kwargs.items():
             setattr(self, attr, value)
         return self.save() if commit else self
 
     def save(self, commit=True):
+        """ save object instance """
         session = get_session()
         session.add(self)
+
         if commit:
             session.commit()
         return self
 
     def delete(self, commit=True):
+        """ delete object instance """
         session = get_session()
         session.delete(self)
         return commit and session.commit()
