@@ -1,8 +1,11 @@
 """
 Goal: create a session and database tables
 so we can run data tests
+
+@see https://docs.python.org/3/library/unittest.mock-examples.html
 """
 import unittest
+# from binascii import unhexlify
 from mock import patch
 from olass import utils
 from olass.models import base
@@ -13,12 +16,21 @@ from olass.models.patient import Patient
 def dummy_get_access_token(*args, **kwargs):
     return None
 
+def dummy_get_patient_hashes(*args, **kwargs):
+    return {}, {}
+
+def dummy_send_hashes_to_server(*args, **kwargs):
+    return True
+
 class BaseTestCase(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(BaseTestCase, self).__init__(*args, **kwargs)
 
-    @patch.multiple(OlassClient, get_access_token=dummy_get_access_token)
+    @patch.multiple(OlassClient,
+                    get_access_token=dummy_get_access_token,
+                    # get_patient_hashes=dummy_get_patient_hashes,
+                    send_hashes_to_server=dummy_send_hashes_to_server)
     def setUp(self):
         """ create all tables """
         super(BaseTestCase, self).setUp()

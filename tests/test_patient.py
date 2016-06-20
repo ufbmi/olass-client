@@ -5,7 +5,6 @@ Authors:
      Andrei Sura <sura.andrei@gmail.com>
 """
 import logging
-# from mock import patch
 from base_test import BaseTestCase
 from olass import utils
 from olass.models.patient import Patient
@@ -43,6 +42,15 @@ class TestPatient(BaseTestCase):
         self.assertEquals("updated", p2.pat_first_name)
         self.assertEquals("", p2.pat_last_name)
 
+        # Test pagination methods
+        # pagination = Patient.query.order_by(
+        #     db.desc(Patient.id)).paginate(1, 2)
+        # self.assertIs(2, len(pagination.items))
+
+        # for pat in pagination.items:
+        #     self.assertIsNotNone(pat)
+
+        # Test deletion
         p2.delete()
         p2 = Patient.get_by_id(1)
         self.assertIsNone(p2)
