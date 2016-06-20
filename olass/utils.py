@@ -1,7 +1,14 @@
 """
 Goal: store utility functions
+
+@authors:
+  Andrei Sura <sura.andrei@gmail.com>
+
 """
 import sys
+
+import uuid
+from binascii import unhexlify
 import unicodedata
 import logging
 import pandas as pd
@@ -30,6 +37,17 @@ def prepare_for_hashing(text):
     if not text:
         return ''
     return text.translate(tbl).lower()
+
+
+def get_uuid_bin(uuid_text=None):
+    """
+    Note: the returned value needs to be hexlified to be human readable
+    """
+    if not uuid_text:
+        uuid_text = uuid.uuid1()
+
+    lower = str(uuid_text).replace('-', '').lower()
+    return unhexlify(lower.encode())
 
 
 def get_file_reader(file_path, columns, sep=','):
@@ -281,3 +299,14 @@ def dict_grouper(iterable, n):
     while True:
         group_iter = islice(sourceiter, n)
         yield chain([next(group_iter)], group_iter)
+
+# def prin_trace():
+#     import traceback
+#     exc_type, exc_value, exc_traceback = sys.exc_info()
+#     print("*** print_tb:")
+#     traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+#     print("*** print_exception:")
+#     traceback.print_exception(exc_type, exc_value, exc_traceback,
+#                               limit=2, file=sys.stdout)
+#     print("*** print_exc:")
+#     traceback.print_exc()
