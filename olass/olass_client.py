@@ -14,10 +14,15 @@ import os
 import sys
 import json
 import requests
+from datetime import datetime
+from sqlalchemy import text
+
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
-from oauthlib.oauth2.rfc6749.errors import TokenExpiredError
+# from oauthlib.oauth2.rfc6749.errors import TokenExpiredError
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+
 from olass import utils
 from olass import rules
 from olass.models import base
@@ -96,13 +101,15 @@ class OlassClient():
                 client_id=client_id,
                 client_secret=client_secret,
                 verify=self.config.get('VERIFY_SSL_CERT', False))
-        except TokenExpiredError as exc:
-            if attempt < TOKEN_REQUEST_ATTEMPTS:
-                log.warn("Try to get a fresh token: {}".format(exc))
-                return self.get_access_token(self, attempt + 1)
-            else:
-                log.error("Give up after {} attempts to get a token: {}"
-                          .format(TOKEN_REQUEST_ATTEMPTS, url))
+            if token.get('expires_in') == 0:
+                if attempt < TOKEN_REQUEST_ATTEMPTS:
+                    log.warn("Got an expired token. Re-trying...")
+                    return self.get_access_token(self, attempt + 1)
+                else:
+                    sys.exit("Give up after {} attempts to get a token: {}"
+                             .format(TOKEN_REQUEST_ATTEMPTS, url))
+        except Exception as exc:
+            log.error("get_access_token() problem due: {}".format(exc))
         return token
 
     @staticmethod
@@ -118,21 +125,34 @@ class OlassClient():
             Patient.pat_first_name.isnot(None),
             Patient.pat_last_name.isnot(None),
             Patient.linkage_uuid.is_(None)
-        ).limit(2)
+        ).limit(200)
         return rules.prepare_patients(patients, rules.RULES_MAP)
 
     @staticmethod
-    def save_response_json(patient_map, json_data):
+    def save_response_json(engine, patient_map, json_data):
         """
-
+        http://docs.sqlalchemy.org/en/latest/orm/query.html
         """
         data = json_data.get('data')
+        linkage_added_at = datetime.now()
 
-        for i, id in patient_map.items():
-            print("{}: {} - {}".format(i, id, data.get(i).get('uuid')))
+        for i, pat_id in patient_map.items():
+            log.info("set linkage_uuid = {} WHERE pat_id = {}"
+                     .format(data.get(i).get('uuid'), pat_id))
+            linkage_uuid = utils.get_uuid_bin(data.get(i).get('uuid'))
+            sql = text('UPDATE patient SET '
+                       '    linkage_uuid = :linkage_uuid, '
+                       '    linkage_added_at = :linkage_added_at '
+                       ' WHERE '
+                       '    pat_id = :pat_id')
+            engine.execute(sql,
+                           linkage_uuid=linkage_uuid,
+                           linkage_added_at=linkage_added_at,
+                           pat_id=pat_id)
+        return True
 
     @staticmethod
-    def send_hashes_to_server(config, patient_map, hashes, access_token):
+    def send_hashes_to_server(config, engine, token, patient_map, hashes):
         """
         Send the specified dictionary to the OLASS server
 
@@ -150,7 +170,7 @@ class OlassClient():
         client = BackendApplicationClient(client_id)
 
         try:
-            olass = OAuth2Session(client=client, token=access_token)
+            olass = OAuth2Session(client=client, token=token)
             json_data = json.dumps({'data': hashes},
                                    indent=2,
                                    sort_keys=True)
@@ -162,7 +182,7 @@ class OlassClient():
                                   verify=config.get('VERIFY_SSL_CERT', False),
                                   )
             response_json = response.json()
-            OlassClient.save_response_json(patient_map, response_json)
+            OlassClient.save_response_json(engine, patient_map, response_json)
             success = True
         except Exception as exc:
             log.error("Failed due: {}".format(exc))
@@ -173,15 +193,16 @@ class OlassClient():
         Retrieve the unprocessed patients, compute hashes,
         and send data to the OLASS server.
         """
-        access_token = self.get_access_token()
-        log.info('Access token: {}'.format(access_token))
+        token = self.get_access_token()
+        log.info('Access token: {}'.format(token))
         patient_map, patient_hashes = OlassClient.get_patient_hashes(
             self.session)
         log.info('Got hashes for [{}] patients'.format(len(patient_hashes)))
         done = OlassClient.send_hashes_to_server(self.config,
+                                                 self.engine,
+                                                 token,
                                                  patient_map,
-                                                 patient_hashes,
-                                                 access_token)
+                                                 patient_hashes)
         if done:
             log.info("All done!")
         else:
