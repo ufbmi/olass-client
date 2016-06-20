@@ -105,7 +105,6 @@ def prepare_patients(patients, rules_map):
         pat_hashes = get_hashes(norm_patient, rules_map)
         hashes[str(count)] = pat_hashes
         patient_map[str(count)] = patient.id
-        log.info("Hashing: {} \n{}".format(norm_patient, pat_hashes))
-        # log.debug("MRN: {} hashes: \n{}".format(patient.pat_mrn, pat_hashes))
+        log.debug("Hashing: {} \n{}".format(norm_patient, pat_hashes))
 
     return patient_map, hashes
