@@ -310,3 +310,37 @@ def dict_grouper(iterable, n):
 #                               limit=2, file=sys.stdout)
 #     print("*** print_exc:")
 #     traceback.print_exc()
+
+def ask_yes_no(question, default="y"):
+    """Ask a yes/no question via raw_input() and return the answer
+    as a boolean.
+
+    :param question: the question displayed to the user
+    :param default: the default answer if the user hits <Enter>
+
+    """
+    valid = {"y": True, "n": False}
+
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "y":
+        prompt = " [Y/n] "
+    elif default == "n":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("invalid default answer: '%s'" % default)
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = input().lower()
+
+        if default is not None and choice == '':
+            return valid[default]
+
+        choice_letter = choice[0]
+
+        if choice_letter in valid:
+            return valid[choice_letter]
+        else:
+            sys.stdout.write("Please respond with 'yes' or 'no' "
+                             "(or 'y' or 'n').\n")
