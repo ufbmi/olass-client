@@ -40,11 +40,17 @@ RULES_MAP = {
 
 def get_hashes(patient, rules_map):
     """
-    Get a dictionary of unhexlified hashes for a patient
+    Get a dictionary of unhexlified hashes for a patient.
+    The number of entries in the dictionary depends on the
+    "number of rules that can be applied" to a specific patient
+
+    :rtype dict
     """
     hashes = {}
     count = 0
 
+    # TODO: implement the requirement descrbed at
+    # https://bmi.program.ufl.edu/jira/browse/OLC-13
     for rule, pattern in rules_map.items():
         raw = pattern.format(patient)
         chunk = utils.apply_sha256(raw)
@@ -95,16 +101,24 @@ def prepare_patients(patients, rules_map):
 
     :param patients: a list of patients for which we need
                      to retrieve `linkage_uuid` from OLASS server
-    :return ?:
+    :rtype tuple(dict, dict)
+    :return two data dictionaries:
+        - lut_patient_id structure:
+            {0 => pat_id, 1 => pat_id...}
+        - lut_patient_hashes structure:
+            {0 => {'0' => 'sha_rule_1', '1' => 'sha_rule_2', ...},
+            {1 => {'0' => 'sha_rule_1', '1' => 'sha_rule_2', ...},
+             ...
+            }
     """
-    hashes = {}
-    patient_map = {}
+    lut_patient_hashes = {}
+    lut_patient_id = {}
 
     for count, patient in enumerate(patients):
         norm_patient = NormalizedPatient(patient)
         pat_hashes = get_hashes(norm_patient, rules_map)
-        hashes[str(count)] = pat_hashes
-        patient_map[str(count)] = patient.id
+        lut_patient_hashes[str(count)] = pat_hashes
+        lut_patient_id[str(count)] = patient.id
         log.debug("Hashing: {} \n{}".format(norm_patient, pat_hashes))
 
-    return patient_map, hashes
+    return lut_patient_id, lut_patient_hashes
