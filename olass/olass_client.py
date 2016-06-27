@@ -245,12 +245,12 @@ class OlassClient():
             sys.exit("Make it so!")
 
         for i in range(batches):
+            # Stop to estimate performance
+            if False and i == 10:
+                sys.exit('Stopped at batch: {}'.format(i))
+
             status, rows = self._run_batch(batches, i, rows_per_batch)
             batch_status[i] = status
-
-            # Stop to estimate performance
-            if i == 10:
-                sys.exit('Stopped at batch: {}'.format(i))
 
         done = all(status for status in batch_status.values())
 
