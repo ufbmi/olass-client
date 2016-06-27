@@ -43,7 +43,7 @@ class Patient(CRUDMixin, DeclarativeBase):
 
     # These two columns are populated when we receive json from OLASS server
     linkage_uuid = db.Column('linkage_uuid', db.Binary)
-    linkage_addded_at = db.Column('linkage_added_at', db.DateTime)
+    linkage_added_at = db.Column('linkage_added_at', db.DateTime)
 
     # Mandatory columns
     pat_birth_date = db.Column('pat_birth_date', db.DateTime, nullable=False)

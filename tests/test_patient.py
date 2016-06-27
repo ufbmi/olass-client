@@ -5,6 +5,7 @@ Authors:
      Andrei Sura <sura.andrei@gmail.com>
 """
 import logging
+from datetime import datetime
 from base_test import BaseTestCase
 from olass import utils
 from olass.models.patient import Patient
@@ -37,10 +38,13 @@ class TestPatient(BaseTestCase):
         self.assertIsNotNone(p2)
         log.info("Got patient: {}".format(p2))
 
-        p2.update(pat_first_name='updated', pat_last_name='')
+        p2.update(pat_first_name='updated',
+                  pat_last_name='',
+                  linkage_added_at=datetime.now())
         p2 = Patient.get_by_id(1)
         self.assertEquals("updated", p2.pat_first_name)
         self.assertEquals("", p2.pat_last_name)
+        self.assertIsNotNone(p2.linkage_added_at)
 
         # Test pagination methods
         # pagination = Patient.query.order_by(

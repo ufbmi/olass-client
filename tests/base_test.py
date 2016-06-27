@@ -39,7 +39,7 @@ class BaseTestCase(unittest.TestCase):
         self.session = self.app.session
         self.create_patients()
         # TODO: move this line to a dedicated test
-        self.app.run()
+        self.app.run(interactive=False)
 
     def tearDown(self):
         """ remove all tables """
