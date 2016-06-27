@@ -7,7 +7,10 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 # from sqlalchemy.orm.exc import UnmappedClassError
 from sqlalchemy.ext import declarative
 
-maker = sessionmaker(autoflush=True, autocommit=False)
+# http://docs.sqlalchemy.org/en/latest/orm/session_basics.html
+maker = sessionmaker(autoflush=True,
+                     autocommit=False,
+                     expire_on_commit=True)
 DBSession = scoped_session(maker)
 session = None
 
