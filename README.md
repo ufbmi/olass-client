@@ -1,20 +1,32 @@
-This repo stores the code for the
-OneFlorda Linkage Submission System (OLASS) client.
+# Intro
+
+This repo stores the code for the OneFlorda Linkage Submission System (OLASS)
+client application.
+
+The goal of the OLASS client is to compute hashes of the patient data elements
+and submit them to the OLASS server to achieve de-duplication.
+The client obtains an access token from the server, submits json data
+to the `/api/save` endpoint, and receives back an unique identifier (UUID)
+for each patient.
 
 
-Preliminary rules for creating hashes of patient data:
+# Authentication
 
-    # _1 First Name + Last Name + DOB + Zip
-    RULE_CODE_F_L_D_Z = 'F_L_D_Z'
+The client is implemented using the 
+[python oauthlib](http://oauthlib.readthedocs.io/en/latest/oauth2/clients/backendapplicationclient.html)
+library and it follows the "client credentials" grant workflow described in the
+[rfc6749](https://tools.ietf.org/html/rfc6749#section-1.3.4).
 
-    # _2 Last Name + First Name + DOB + Zip
-    RULE_CODE_L_F_D_Z = 'L_F_D_Z'
 
-    # _3 First Name + Last Name + DOB + City
-    RULE_CODE_F_L_D_C = 'F_L_D_C'
+    +---------+                                  +---------------+
+    :         :                                  :               :
+    :         :>-- A - Client Authentication --->: Authorization :
+    : Client  :                                  :     Server    :
+    :         :<-- B ---- Access Token ---------<:               :
+    :         :                                  :               :
+    +---------+                                  +---------------+
 
-    # _4 Last Name + First Name + DOB + City
-    RULE_CODE_L_F_D_C = 'L_F_D_C'
 
-    # _5 Three Letter FN + Three Letter LN + Soundex FN + Soundex LN + DOB
-    RULE_CODE_3F_3L_SF_SL_D = '3F_3L_SF_SL_D'
+# License
+
+This project is covered by the [MIT License](LICENSE).
