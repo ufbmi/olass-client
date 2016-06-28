@@ -1,4 +1,4 @@
-# Intro
+# Introduction
 
 This repo stores the code for the OneFlorda Linkage Submission System (OLASS)
 client application.
@@ -30,3 +30,11 @@ library and it follows the "client credentials" grant workflow described in the
 # License
 
 This project is covered by the [MIT License](LICENSE).
+
+## Contributors
+
+The application was designed and implemented by Andrei Sura with tremendous
+support, fedback and contributions from the
+[BMI team](https://github.com/orgs/ufbmi/people).
+
+For the complete list of contributors please see [AUTHORS.md](AUTHORS.md)
