@@ -24,5 +24,5 @@ coverage.json
 pylint.out
 
 db.sqlite
-data/
-tests/voter_out.csv
+
+/config.py
