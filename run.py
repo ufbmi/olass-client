@@ -16,6 +16,16 @@ if __name__ == "__main__":
     parser.add_argument('--config',
                         default='config.py',
                         help="Application config file")
+    parser.add_argument('--interactive',
+                        default=True,
+                        help="When `true` ask for confirmation")
+
+    parser.add_argument('--rows',
+                        default=100,
+                        help="Number of rows/batch sent to the server")
+
     args = parser.parse_args()
-    app = OlassClient(config_file=args.config)
+    app = OlassClient(config_file=args.config,
+                      interactive=args.interactive,
+                      rows_per_batch=args.rows)
     app.run()

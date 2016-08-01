@@ -18,8 +18,6 @@ DB_NAME = 'olassc'
 DB_USER = 'olassc'
 DB_PASS = 'insecurepassword'
 
-# ##############################################
-# Params used while running run_data_import.py #
-# ##############################################
-# @see utils:process_frame()
-SEND_TO_DB = True
+# Partners should only add/remove elements to this array
+# to activate/deactivate hashing rules
+ENABLED_RULES = ['F_L_D_Z', 'L_F_D_Z', 'F_L_D_C', 'L_F_D_C']
