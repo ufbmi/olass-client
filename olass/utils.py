@@ -168,6 +168,7 @@ def list_grouper(iterable, n, fillvalue=None):
 
 def dict_grouper(iterable, n):
     """
+    TODO: investigate why not always returning same results
     Stream the elements of the the dictionary in groups of "n".
     @see http://programeveryday.com/post/using-python-itertools-to-save-memory/
     The chain function can take any number of iterables and will return a new
