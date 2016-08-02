@@ -9,9 +9,8 @@ import sys
 
 import uuid
 from binascii import unhexlify
-import unicodedata
 import logging
-
+import unicodedata
 import sqlalchemy as db
 from itertools import zip_longest, islice, chain
 from hashlib import sha256
@@ -26,15 +25,19 @@ FORMAT_DATABASE_DATE = "%Y-%m-%d"
 
 
 # table of punctuation characters + space
-tbl = dict.fromkeys(i for i in range(sys.maxunicode)
-                    if unicodedata.category(chr(i)).startswith('P') or
-                    chr(i) in [' '])
+CHARS_TO_DELETE = dict.fromkeys(
+    i for i in range(sys.maxunicode)
+    if unicodedata.category(chr(i)).startswith('P') or
+    not chr(i).isalnum())
 
 
 def prepare_for_hashing(text):
+    """
+    Given a string with punctuation characters
+    """
     if not text:
         return ''
-    return text.translate(tbl).lower()
+    return text.translate(CHARS_TO_DELETE).lower()
 
 
 def get_uuid_bin(uuid_text=None):

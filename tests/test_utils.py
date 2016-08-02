@@ -16,9 +16,9 @@ class TestUtils(BaseTestCase):
     def test_prepare_for_hashing(self):
         """Verify that punctuation characters are removed """
         subjects = {
-            '1': {'in': 'AbC xyZ', 'out': 'abcxyz'},
-            '2': {'in': 'A&B,C.D:E;F-G}{H!?I@#', 'out': 'abcdefghi'},
-            '3': {'in': 'A^B|C', 'out': 'a^b|c'},
+            '1': {'in': 'AbC xyZă', 'out': 'abcxyză'},
+            '2': {'in': 'A&B,C.D:E;F-G}H{I@#J!', 'out': 'abcdefghij'},
+            '3': {'in': 'ABC!"#$%&\'()*+,-./:;=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c', 'out': 'abc'},  # NOQA
         }
 
         for case, data in subjects.items():
