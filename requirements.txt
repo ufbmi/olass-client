@@ -6,3 +6,4 @@ pandas
 pytest-cov
 pytest
 requests-oauthlib
+SQLAlchemy
