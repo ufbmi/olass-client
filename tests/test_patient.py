@@ -8,6 +8,8 @@ import logging
 from datetime import datetime
 from base_test import BaseTestCase
 from olass import utils
+from olass import rules
+from olass.rules import NormalizedPatient
 from olass.models.patient import Patient
 
 lformat = '%(name)s.%(levelname)s ' \
@@ -39,12 +41,38 @@ class TestPatient(BaseTestCase):
         log.info("Got patient: {}".format(p2))
 
         p2.update(pat_first_name='updated',
-                  pat_last_name='',
-                  linkage_added_at=datetime.now())
+                  pat_last_name='xyz',
+                  linkage_added_at=datetime.now(),
+                  pat_address_zip='19116')
         p2 = Patient.get_by_id(1)
         self.assertEquals("updated", p2.pat_first_name)
-        self.assertEquals("", p2.pat_last_name)
+        self.assertEquals("xyz", p2.pat_last_name)
         self.assertIsNotNone(p2.linkage_added_at)
+
+        # Test normalized patients hashing -- since the city is
+        # missing only 2 out of 4 hashes will be computed
+        patients = self.session.query(Patient).limit(2)
+        hashing_rules = ['F_L_D_Z', 'L_F_D_Z', 'F_L_D_C', 'L_F_D_C']
+        required_attr = ['pat_last_name', 'pat_first_name',
+                         'pat_address_zip', 'pat_birth_date']
+
+        for count, patient in enumerate(patients):
+            norm_patient = NormalizedPatient(patient)
+            pat_hashes = rules.get_hashes(norm_patient, hashing_rules)
+            self.assertIs(len(pat_hashes), 2)
+            print('==> {} Check has {} values for {}'
+                  .format(count, required_attr, norm_patient))
+            self.assertTrue(norm_patient.has_all_data(required_attr))
+
+        patient_map, patient_hashes = rules.prepare_patients(patients,
+                                                             hashing_rules)
+        self.assertIsNotNone(patient_map)
+        self.assertIsNotNone(patient_hashes)
+        one_patient_hashes = patient_hashes.get('0')
+        hash_0 = one_patient_hashes.get('0')
+        hash_1 = one_patient_hashes.get('1')
+        self.assertEqual(hash_0, 'beba2cd1a2644b44a44a5fb65cb42d22ea7a5cc3f245fc0816f3da5969a31415')  # NOQA
+        self.assertEqual(hash_1, '4d4daf6e6c11770607199f269535e80b2034e184477c8cec5edc40539ddeaf41')  # NOQA
 
         # Test pagination methods
         # pagination = Patient.query.order_by(

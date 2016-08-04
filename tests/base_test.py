@@ -16,11 +16,14 @@ from olass.models.patient import Patient
 def dummy_get_access_token(*args, **kwargs):
     return None
 
+
 def dummy_get_patient_hashes(*args, **kwargs):
     return {}, {}
 
+
 def dummy_send_hashes_to_server(*args, **kwargs):
     return True
+
 
 class BaseTestCase(unittest.TestCase):
 
@@ -35,11 +38,12 @@ class BaseTestCase(unittest.TestCase):
         """ create all tables """
         super(BaseTestCase, self).setUp()
         self.app = OlassClient(config_file='config_tests.py',
+                               interactive=False,
                                create_tables=True)
         self.session = self.app.session
         self.create_patients()
         # TODO: move this line to a dedicated test
-        self.app.run(interactive=False)
+        self.app.run()
 
     def tearDown(self):
         """ remove all tables """

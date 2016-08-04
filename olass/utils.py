@@ -9,34 +9,35 @@ import sys
 
 import uuid
 from binascii import unhexlify
-import unicodedata
 import logging
-import pandas as pd
+import unicodedata
 import sqlalchemy as db
 from itertools import zip_longest, islice, chain
 from hashlib import sha256
 from datetime import datetime
 from datetime import date
-from olass.models.patient import Patient
 
 log = logging.getLogger(__package__)
 # FORMAT_US_DATE = "%x"
 # FORMAT_US_DATE_TIME = '%x %X'
 FORMAT_DATABASE_DATE = "%Y-%m-%d"
-FORMAT_DATABASE_DATE_TIME = "%Y-%m-%d %H:%M:%S"
+# FORMAT_DATABASE_DATE_TIME = "%Y-%m-%d %H:%M:%S"
 
-LINES_PER_CHUNK = 20000
 
 # table of punctuation characters + space
-tbl = dict.fromkeys(i for i in range(sys.maxunicode)
-                    if unicodedata.category(chr(i)).startswith('P') or
-                    chr(i) in [' '])
+CHARS_TO_DELETE = dict.fromkeys(
+    i for i in range(sys.maxunicode)
+    if unicodedata.category(chr(i)).startswith('P') or
+    not chr(i).isalnum())
 
 
 def prepare_for_hashing(text):
+    """
+    Given a string with punctuation characters
+    """
     if not text:
         return ''
-    return text.translate(tbl).lower()
+    return text.translate(CHARS_TO_DELETE).lower()
 
 
 def get_uuid_bin(uuid_text=None):
@@ -48,32 +49,6 @@ def get_uuid_bin(uuid_text=None):
 
     lower = str(uuid_text).replace('-', '').lower()
     return unhexlify(lower.encode())
-
-
-def get_file_reader(file_path, columns, sep=','):
-    """
-    Get csv data in chunks with size defined by LINES_PER_CHUNK
-
-    :param columns: dictionary mapping the destination <=> source columns
-    """
-    log.info("columns: {}".format(columns))
-    reader = None
-    source_columns = [col for col in columns.values()]
-
-    try:
-        reader = pd.read_csv(file_path,
-                             sep=sep,
-                             dtype=object,
-                             skipinitialspace=True,
-                             skip_blank_lines=True,
-                             usecols=source_columns,
-                             chunksize=LINES_PER_CHUNK,
-                             iterator=True)
-        return reader
-    except ValueError as exc:
-        log.error("Please check if the column names match: {}"
-                  "\nError: {}".format(source_columns, exc))
-    return reader
 
     # def get_db_url_sqlserver(db_host, db_port, db_name, db_user, db_pass):
     #     """
@@ -126,14 +101,14 @@ def get_db_engine(config):
     return engine
 
 
-def serialize_data_frame(config, df, entity):
+def apply_sha256(val):
+    """ Compute sha256 sum
+    :param val: the input string
+    :rtype string: the sha256 hexdigest
     """
-    Write the frame to the specific entity table
-    """
-    engine = get_db_engine(config)
-    records = df.to_dict(orient='records')
-    result = engine.execute(entity.__table__.insert(), records)
-    return result
+    m = sha256()
+    m.update(val.encode('utf-8'))
+    return m.hexdigest()
 
 
 def format_date_as_string(val, fmt='%m-%d-%Y'):
@@ -173,97 +148,6 @@ def format_date(val, fmt='%m-%d-%Y'):
     return date
 
 
-def process_frame(df_source, columns, config):
-    """
-    Apply column-specific logic (data transformation/filtering)
-    """
-    df_source.fillna('', inplace=True)
-    df_size = min(LINES_PER_CHUNK, df_source.index.max() + 1)
-    df = create_data_frame(columns.keys(), df_size)
-
-    for col, source_col in columns.items():
-        # log.info("Parsing df[{}] = .. from {}".format(col, source_col))
-        if 'pat_birth_date' == col:
-            df[col] = df_source[source_col].map(
-                lambda x: format_date(x, fmt='%m/%d/%Y'))
-        else:
-            df[col] = df_source[source_col]
-
-    if config['SEND_TO_DB']:
-        # write the records to the database
-        serialize_data_frame(config, df, Patient)
-
-    return df
-
-
-def process_reader_data(reader, columns, config):
-    """
-    For each chunk of the original file call `meth`:process_frame
-    """
-    # TODO: Use paralel processing
-    frames = []
-
-    for index, df_source in enumerate(reader):
-        log.info("Process frame: {}".format(index))
-        df = process_frame(df_source, columns, config)
-        frames.append(df)
-
-    return pd.concat(frames, ignore_index=True)
-
-
-def create_data_frame(columns, index_size=0, do_fill=True):
-    """"
-    :param columns: the names of the columns
-    :param index_size: how many rows
-    :param do_fill: flag for filling the data frame with empty strings
-    """
-    index = range(index_size)
-    df = pd.DataFrame(index=index, columns=columns)
-
-    if do_fill:
-        df.fillna('', inplace=True)
-    return df
-
-
-def write_data_frame(df, file_path, sep=','):
-    """
-    Store the dataframe to a file
-    """
-    try:
-        df.to_csv(file_path, sep=sep, index=False, encoding='utf-8')
-    except Exception as exc:
-        print("Problem writing file {} due: \n{}".format(file_path, exc))
-        raise exc
-    return True
-
-
-def import_voter_data(file_path, columns, out_file, config):
-    """
-    Extract `columns` from the csv file specified by `file_path`
-    and store them to to a file, and optionally to the database.
-    """
-    reader = get_file_reader(file_path, columns)
-    df = process_reader_data(reader, columns, config)
-    log.info("Done with processing... Writing the output file: {}"
-             .format(out_file))
-    success = write_data_frame(df, out_file)
-
-    if success:
-        log.info('Wrote result file: {}'.format(out_file))
-    else:
-        log.error("Failed to write file: {}".format(out_file))
-
-
-def apply_sha256(val):
-    """ Compute sha256 sum
-    :param val: the input string
-    :rtype string: the sha256 hexdigest
-    """
-    m = sha256()
-    m.update(val.encode('utf-8'))
-    return m.hexdigest()
-
-
 def list_grouper(iterable, n, fillvalue=None):
     """
     Collect data into fixed-length chunks or blocks.
@@ -287,6 +171,7 @@ def list_grouper(iterable, n, fillvalue=None):
 
 def dict_grouper(iterable, n):
     """
+    TODO: investigate why not always returning same results
     Stream the elements of the the dictionary in groups of "n".
     @see http://programeveryday.com/post/using-python-itertools-to-save-memory/
     The chain function can take any number of iterables and will return a new
@@ -310,6 +195,7 @@ def dict_grouper(iterable, n):
 #                               limit=2, file=sys.stdout)
 #     print("*** print_exc:")
 #     traceback.print_exc()
+
 
 def ask_yes_no(question, default="y"):
     """Ask a yes/no question via raw_input() and return the answer

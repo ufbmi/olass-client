@@ -48,13 +48,17 @@ log.debug("logging was configured...")
 # alog.setLevel(logging.INFO)
 
 TOKEN_REQUEST_ATTEMPTS = 3
-DEFAULT_ROWS_PER_BATCH = 3000
 
 
 class OlassClient():
 
-    def __init__(self, config_file, create_tables=False,
-                 root_path='.', default_config={}):
+    def __init__(self,
+                 config_file,
+                 interactive=True,
+                 rows_per_batch=1,
+                 create_tables=False,
+                 root_path='.',
+                 default_config={}):
         """
         Setup the database connection obtain an access token
         """
@@ -63,9 +67,34 @@ class OlassClient():
             root_path=root_path,
             defaults=default_config)
         self.config.from_pyfile(config_file)
+        self.update_config(interactive=interactive,
+                           rows_per_batch=rows_per_batch)
+        self.validate_config_rules()
         self.engine = utils.get_db_engine(self.config)
         self.session = OlassClient.get_db_session(self.engine, create_tables)
         # self.config.from_object(some_module.DefaultConfig)
+
+    def update_config(self, interactive, rows_per_batch=1):
+        """
+        Write the command line options to the config object for easy access.
+
+        :param interactive: when `true` ask for confirmation before executing
+        :param rows_per_batch: how many rows to process each time we
+                               connect to the server
+
+        """
+        if rows_per_batch is None or rows_per_batch < 1:
+            rows_per_batch = 1
+
+        self.config['INTERACTIVE'] = interactive
+        self.config['ROWS_PER_BATCH'] = rows_per_batch
+
+    def validate_config_rules(self):
+        for rule_code in self.config.get('ENABLED_RULES'):
+            if rule_code not in rules.AVAILABLE_RULES_MAP:
+                raise Exception('Invalid rule code: [{}]! '
+                                'Available codes are: {}'
+                                .format(rule_code, rules.AVAILABLE_RULES_MAP))
 
     @classmethod
     def get_db_session(cls, engine, create_tables=False):
@@ -113,29 +142,38 @@ class OlassClient():
                              .format(TOKEN_REQUEST_ATTEMPTS))
         except Exception as exc:
             log.error("get_access_token() problem due: {}".format(exc))
+            raise exc
         return token
 
     @staticmethod
-    def get_patient_data(session, rows_per_batch):
+    def get_patient_data(session, rows_per_batch, hashing_rules):
         """
         Find patients without `linkage_uuid` and hash their data
 
-        :return two data dictionaries:
+        :param session: the database session
+        :param rows_per_batch: how many entries to load at one time
+            (to avoid overloading the server)
+        :param hashing_rules: a list of rule codes
+            which should match the constants defined in `olass.rules` module
+        :return: two data dictionaries:
             patient_map, hashes
         """
-        # TODO: the rules for finding patients need to be configurable
         patients = session.query(Patient).filter(
             Patient.pat_birth_date.isnot(None),
             Patient.pat_first_name.isnot(None),
             Patient.pat_last_name.isnot(None),
             Patient.linkage_uuid.is_(None)
         ).limit(rows_per_batch)
-        return rules.prepare_patients(patients, rules.RULES_MAP)
+        return rules.prepare_patients(patients, hashing_rules)
 
     @staticmethod
     def save_response_json(session, patient_map, json_data):
         """
+        Called by :meth:`send_hashes_to_server`
+
         http://docs.sqlalchemy.org/en/latest/orm/query.html
+
+        :param session: the database session
         """
         data = json_data.get('data')
         linkage_added_at = datetime.now()
@@ -154,7 +192,6 @@ class OlassClient():
     def send_hashes_to_server(config, session, token, patient_map, hashes):
         """
         Send the specified dictionary to the OLASS server.
-        Note: the number of records sent is determined by DEFAULT_ROWS_PER_BATCH
 
         :rtype Boolean
         :return True: if all data was sent to the server and response
@@ -193,16 +230,20 @@ class OlassClient():
     @staticmethod
     def get_batch_count(session, rows_per_batch):
         """
-        Used by ``:meth:run()``
+        Used by :meth:`run`
         """
         sql = text('SELECT COUNT(*) AS rows '
                    'FROM patient WHERE linkage_uuid IS NULL')
         rows = session.execute(sql).scalar()
-        return 1 + int(rows/rows_per_batch)
+        return 1 + int(rows / rows_per_batch)
 
-    def _run_batch(self, batches, batch, rows_per_batch):
+    def _run_batch(self, batch_count, batch):
         """
-        Called by ``:meth:run()``
+        Called by :meth:`run`
+
+        :param batch_count: how many are totaly
+        :param batch: the current batch number
+        :return: tuple(bool, number_of_hashes_computed)
         """
         log.info("Processing batch: {}".format(batch))
         token = self.get_access_token()
@@ -212,9 +253,12 @@ class OlassClient():
         self.session.expire_all()
 
         patient_map, patient_hashes = OlassClient.get_patient_data(
-            self.session, rows_per_batch)
+            self.session,
+            self.config.get('ROWS_PER_BATCH'),
+            self.config.get('ENABLED_RULES')
+        )
         log.info('Batch [{} out of {}] got hashes for [{}] patients'
-                 .format(batch, batches, len(patient_hashes)))
+                 .format(batch, batch_count, len(patient_hashes)))
         done = OlassClient.send_hashes_to_server(self.config,
                                                  self.session,
                                                  token,
@@ -222,34 +266,30 @@ class OlassClient():
                                                  patient_hashes)
         return done, len(patient_hashes)
 
-    def run(self, interactive=True, rows_per_batch=None):
+    def run(self):
         """
         Retrieve the unprocessed patients, compute hashes,
         and send data to the OLASS server.
 
-        :param rows_per_batch: how many rows to process each time we
-                               connect to the server
         """
-        # TODO: read this value from the command line
-        if rows_per_batch is None or rows_per_batch < 100:
-            rows_per_batch = DEFAULT_ROWS_PER_BATCH
-
         log.info('TOKEN_URL: {}'.format(self.config.get('TOKEN_URL')))
-        batches = OlassClient.get_batch_count(self.session, rows_per_batch)
+        rows_per_batch = self.config.get('ROWS_PER_BATCH')
+        batch_count = OlassClient.get_batch_count(self.session, rows_per_batch)
         batch_status = {}
 
         question = "Do you want to continue with " \
-            "{} batches ({} rows per batch)?".format(batches, rows_per_batch)
+            "{} batches ({} rows per batch)?".format(batch_count,
+                                                     rows_per_batch)
 
-        if interactive and not utils.ask_yes_no(question):
+        if self.config.get('INTERACTIVE') and not utils.ask_yes_no(question):
             sys.exit("Make it so!")
 
-        for i in range(batches):
+        for i in range(batch_count):
             # Stop to estimate performance
             if False and i == 10:
                 sys.exit('Stopped at batch: {}'.format(i))
 
-            status, rows = self._run_batch(batches, i, rows_per_batch)
+            status, rows = self._run_batch(batch_count, i)
             batch_status[i] = status
 
         done = all(status for status in batch_status.values())

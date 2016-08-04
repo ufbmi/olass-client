@@ -22,36 +22,52 @@ RULE_CODE_F_L_D_C = 'F_L_D_C'  # NOQA
 # _4 Last Name + First Name + DOB + City
 RULE_CODE_L_F_D_C = 'L_F_D_C'  # NOQA
 
-# _5 Three Letter FN + Three Letter LN + Soundex FN + Soundex LN + DOB
-# RULE_CODE_3F_3L_SF_SL_D = '3F_3L_SF_SL_D'  # NOQA
 
-
-RULES_MAP = {
-    RULE_CODE_F_L_D_Z:
-        '{0.pat_first_name}{0.pat_last_name}{0.pat_birth_date}{0.pat_address_zip}',  # NOQA
-    RULE_CODE_L_F_D_Z:
-        '{0.pat_last_name}{0.pat_first_name}{0.pat_birth_date}{0.pat_address_zip}',  # NOQA
-    RULE_CODE_F_L_D_C:
-        '{0.pat_first_name}{0.pat_last_name}{0.pat_birth_date}{0.pat_address_city}',  # NOQA
-    RULE_CODE_L_F_D_C:
-        '{0.pat_last_name}{0.pat_first_name}{0.pat_birth_date}{0.pat_address_city}',  # NOQA
+# In order to guarantee correctness we will allow the partners
+# to add to the configuration only values from the map below.
+# If we add new rules then we will ask the partners to download a new version
+# of the client software.
+AVAILABLE_RULES_MAP = {
+    RULE_CODE_F_L_D_Z: {
+        'required_attr': ['pat_first_name', 'pat_last_name', 'pat_birth_date', 'pat_address_zip'],  # NOQA
+        'pattern': '{0.pat_first_name}{0.pat_last_name}{0.pat_birth_date}{0.pat_address_zip}',  # NOQA
+    },
+    RULE_CODE_L_F_D_Z: {
+        'required_attr': ['pat_first_name', 'pat_last_name', 'pat_birth_date', 'pat_address_zip'],  # NOQA
+        'pattern': '{0.pat_last_name}{0.pat_first_name}{0.pat_birth_date}{0.pat_address_zip}',  # NOQA
+    },
+    RULE_CODE_F_L_D_C: {
+        'required_attr': ['pat_first_name', 'pat_last_name', 'pat_birth_date', 'pat_address_city'],  # NOQA
+        'pattern': '{0.pat_first_name}{0.pat_last_name}{0.pat_birth_date}{0.pat_address_city}',  # NOQA
+    },
+    RULE_CODE_L_F_D_C: {
+        'required_attr': ['pat_first_name', 'pat_last_name', 'pat_birth_date', 'pat_address_city'],  # NOQA
+        'pattern': '{0.pat_last_name}{0.pat_first_name}{0.pat_birth_date}{0.pat_address_city}',  # NOQA
+    },
 }
 
 
-def get_hashes(patient, rules_map):
+def get_hashes(patient, hashing_rules):
     """
     Get a dictionary of unhexlified hashes for a patient.
     The number of entries in the dictionary depends on the
     "number of rules that can be applied" to a specific patient
 
+    :param hashing_rules: a list of hashing rules codes
     :rtype dict
     """
     hashes = {}
     count = 0
 
-    # TODO: implement the requirement descrbed at
-    # https://bmi.program.ufl.edu/jira/browse/OLC-13
-    for rule, pattern in rules_map.items():
+    for rule in hashing_rules:
+        rule_data = AVAILABLE_RULES_MAP.get(rule)
+        pattern = rule_data['pattern']
+        required_attr = rule_data['required_attr']
+
+        if not patient.has_all_data(required_attr):
+            log.debug("Skip hashing patient [{}] due to missing data"
+                      "for rule [{}]".format(patient.id, rule))
+            continue
         raw = pattern.format(patient)
         chunk = utils.apply_sha256(raw)
         log.debug("Rule {} raw data: {}, hashed: {}".format(rule, raw, chunk))
@@ -63,7 +79,7 @@ def get_hashes(patient, rules_map):
 
 class NormalizedPatient():
     """
-    Helper class used to ormalize the strings by
+    Helper class used to normalize the strings by
     removing punctuation and transforming to lowercase.
 
     .. seealso::
@@ -71,6 +87,8 @@ class NormalizedPatient():
         :meth:`utils.prepare_for_hashing`
     """
     def __init__(self, pat):
+        self.id = pat.id
+
         self.pat_birth_date = utils.format_date_as_string(
             pat.pat_birth_date, utils.FORMAT_DATABASE_DATE
         )
@@ -87,6 +105,17 @@ class NormalizedPatient():
             pat.pat_address_zip
         )
 
+    def has_all_data(self, required_attributes):
+        """
+        :return bool: `True` if all `required_attributes` have a
+        non-empty value
+        """
+        for attr in required_attributes:
+            if not getattr(self, attr, None):
+                log.debug("--> Missing value for attr [{}]".format(attr))
+                return False
+        return True
+
     def __repr__(self):
         return "NormalizedPatient <pat_birth_date: {0.pat_birth_date}, " \
             "pat_first_name: {0.pat_first_name}, " \
@@ -95,7 +124,7 @@ class NormalizedPatient():
             "pat_address_zip: {0.pat_address_zip}>".format(self)
 
 
-def prepare_patients(patients, rules_map):
+def prepare_patients(patients, hashing_rules):
     """
     Calculate hashes for patients.
 
@@ -116,7 +145,7 @@ def prepare_patients(patients, rules_map):
 
     for count, patient in enumerate(patients):
         norm_patient = NormalizedPatient(patient)
-        pat_hashes = get_hashes(norm_patient, rules_map)
+        pat_hashes = get_hashes(norm_patient, hashing_rules)
         lut_patient_hashes[str(count)] = pat_hashes
         lut_patient_id[str(count)] = patient.id
         log.debug("Hashing: {} \n{}".format(norm_patient, pat_hashes))
