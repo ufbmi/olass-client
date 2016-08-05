@@ -67,14 +67,21 @@ class _QueryProperty():
 DeclarativeBase = declarative.declarative_base(cls=ReprBase)
 metadata = DeclarativeBase.metadata
 
+
 class Model():
+    # TODO: document
     query_class = None
     query = None
 
+
 class NiceSQLAlchemy():
+    """
+    Provides convenient access to the declarative_base class.
+    """
+
     def __init__(self, model_class=Model, metadata=None):
-        self.session = None  # TODO
-        self.Query = BaseQuery
+        # self.session = None  # TODO
+        # self.Query = BaseQuery  # TODO
         self.Model = self.make_declarative_base(model_class, metadata)
 
     def make_declarative_base(self, model_class, metadata=None):
@@ -86,8 +93,8 @@ class NiceSQLAlchemy():
                                             )
 
         # TODO: why do we need this check here???
-        if not getattr(base, 'query_class', None):
-            base.query_class = self.Query
+        # if not getattr(base, 'query_class', None):
+        #     base.query_class = self.Query
 
         base.query = _QueryProperty(self)
         return base
