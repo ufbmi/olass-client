@@ -2,8 +2,7 @@
 invoke
 mock
 mysql-connector
-pandas
 pytest-cov
-pytest
+pylint
 requests-oauthlib
 SQLAlchemy

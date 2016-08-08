@@ -6,16 +6,17 @@ Goal: store utility functions
 
 """
 import sys
-
 import uuid
-from binascii import unhexlify
 import logging
 import unicodedata
-import sqlalchemy as db
+
+from binascii import unhexlify
 from itertools import zip_longest, islice, chain
 from hashlib import sha256
 from datetime import datetime
 from datetime import date
+
+import sqlalchemy as db
 
 log = logging.getLogger(__package__)
 # FORMAT_US_DATE = "%x"
@@ -66,6 +67,9 @@ def get_uuid_bin(uuid_text=None):
 
 
 def get_db_url_mysql(config):
+    """
+    Format the configuration parameters to build the connection string
+    """
     if 'DB_URL_TESTING' in config:
         return config['DB_URL_TESTING']
 
@@ -91,13 +95,13 @@ def get_db_engine(config):
                                   pool_recycle=3600,
                                   echo=False)
     except TypeError as exc:
-        log.warn("Got exc from db.create_engine(): {}".format(exc))
+        log.warning("Got exc from db.create_engine(): {}".format(exc))
         engine = db.create_engine(url, echo=False)
 
     try:
         engine.execute("USE {}".format(db_name))
     except db.exc.OperationalError:
-        log.warn('Cannot select [{}] database.'.format(db_name))
+        log.warning('Cannot select [{}] database.'.format(db_name))
     return engine
 
 
@@ -137,15 +141,15 @@ def format_date(val, fmt='%m-%d-%Y'):
     :param val: the input string for date
     :param fmt: the input format for the date
     """
-    date = None
+    date_obj = None
 
     try:
-        date = datetime.strptime(val, fmt)
+        date_obj = datetime.strptime(val, fmt)
     except Exception as exc:
         log.warning("Problem formatting date: {} - {} due: {}"
                     .format(val, fmt, exc))
 
-    return date
+    return date_obj
 
 
 def list_grouper(iterable, n, fillvalue=None):
