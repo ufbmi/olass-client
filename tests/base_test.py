@@ -37,7 +37,7 @@ class BaseTestCase(unittest.TestCase):
     def setUp(self):
         """ create all tables """
         super(BaseTestCase, self).setUp()
-        self.app = OlassClient(config_file='config_tests.py',
+        self.app = OlassClient(config_file='config/settings_tests.py',
                                interactive=False,
                                create_tables=True)
         self.session = self.app.session

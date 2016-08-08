@@ -11,12 +11,10 @@ venv/
 htmlcov/
 cover/
 coverage.xml
-nosetests.xml
 .coverage
 *.egg-info
 .eggs/
 mock-*
-nosexcover-*
 .ropeproject/
 .idea/
 .coveralls.yml
@@ -25,4 +23,6 @@ pylint.out
 
 db.sqlite
 
-/config.py
+/config/settings.py
+/dist
+/build

@@ -9,12 +9,14 @@ Goal: Implement the application entry point.
 import argparse
 from olass.olass_client import OlassClient
 
+DEFAULT_SETTINGS_FILE = 'config/settings.py'
 
-if __name__ == "__main__":
+
+def main():
     """ Read args """
     parser = argparse.ArgumentParser()
     parser.add_argument('--config',
-                        default='config.py',
+                        default=DEFAULT_SETTINGS_FILE,
                         help="Application config file")
     parser.add_argument('--interactive',
                         default=True,
@@ -29,3 +31,7 @@ if __name__ == "__main__":
                       interactive=args.interactive,
                       rows_per_batch=args.rows)
     app.run()
+
+
+if __name__ == "__main__":
+    main()

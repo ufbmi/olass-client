@@ -1,0 +1,46 @@
+from setuptools import setup, find_packages
+
+# @see https://pythonhosted.org/setuptools/setuptools.html
+
+"""
+Understanding how to use `enty points` from setup.py
+-   http://click.pocoo.org/dev/setuptools/
+-   http://python-packaging.readthedocs.io/en/latest/command-line-scripts.html
+"""
+
+setup(
+    name="olass",
+
+    # https://github.com/pypa/setuptools_scm
+    setup_requires=["setuptools_scm"],
+    use_scm_version=True,
+    # packages=["olass"],
+
+    # version='0.0.1',
+    packages=find_packages(exclude=['tests']),
+    include_package_data=True,
+    url="https://github.com/ufbmi/olass-client",
+    keywords=["entity resolution", "deduplication", "patient linkage"],
+    license="MIT",
+    author="Andrei Sura",
+    author_email="bmi-developers@ad.ufl.edu",
+    description='OneFlorida Linkage Submission System (aka ERCA - Entity Resolution Client Application)',  # NOQA
+    long_description=open("README.md").read(),
+
+    install_requires=[
+        "mysql-connector",
+        "requests-oauthlib",
+        "SQLAlchemy",
+    ],
+    entry_points={
+        "console_scripts": [
+            "olass = olass.run:main",
+        ],
+    },
+
+    tests_require=[
+        "mock",
+        "pytest-cov"
+    ],
+    test_suite="tests",
+)
