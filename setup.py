@@ -1,12 +1,20 @@
-from setuptools import setup, find_packages
-
-# @see https://pythonhosted.org/setuptools/setuptools.html
-
 """
+Goal: Configure the package build and distribution
+
 Understanding how to use `enty points` from setup.py
 -   http://click.pocoo.org/dev/setuptools/
 -   http://python-packaging.readthedocs.io/en/latest/command-line-scripts.html
 """
+
+import unittest
+from setuptools import setup, find_packages
+
+
+def olass_test_suite():
+    test_loader = unittest.TestLoader()
+    test_suite = test_loader.discover('tests', pattern='test_*.py')
+    return test_suite
+
 
 setup(
     name="olass",
@@ -42,5 +50,5 @@ setup(
         "mock",
         "pytest-cov"
     ],
-    test_suite="tests",
+    test_suite="setup.olass_test_suite",
 )
