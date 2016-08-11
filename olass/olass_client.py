@@ -14,6 +14,8 @@ import os
 import sys
 import json
 import requests
+import logging
+
 from datetime import datetime
 from sqlalchemy import text
 
@@ -24,9 +26,11 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from olass import utils
 from olass import rules
+from olass.config import Config
 from olass.models import base
 from olass.models.patient import Patient
-import logging
+from olass.version import __version__
+
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -62,7 +66,7 @@ class OlassClient():
         """
         Setup the database connection obtain an access token
         """
-        from olass.config import Config
+        self.show_logo()
         self.config = Config(
             root_path=root_path,
             defaults=default_config)
@@ -298,3 +302,14 @@ class OlassClient():
             log.info("All done!")
         else:
             log.info("Fail!")
+
+    def show_logo(self):
+        """ show a figlet... """
+        print("""
+  ___  _        _    ____ ____
+ / _ \| |      / \  / ___/ ___|  __   __
+| | | | |     / _ \ \___ \___ \  \ \ / /+======
+| |_| | |___ / ___ \ ___) |__) |  \ V / # {}
+ \___/|_____/_/   \_\____/____/    \_/  +======
+
+""".format(__version__))

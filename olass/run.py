@@ -8,6 +8,7 @@ Goal: Implement the application entry point.
 
 import argparse
 from olass.olass_client import OlassClient
+from olass.version import __version__
 
 DEFAULT_SETTINGS_FILE = 'config/settings.py'
 
@@ -15,6 +16,10 @@ DEFAULT_SETTINGS_FILE = 'config/settings.py'
 def main():
     """ Read args """
     parser = argparse.ArgumentParser()
+    parser.add_argument("--version",
+                        default=False,
+                        action='store_true',
+                        help="Show the version number")
     parser.add_argument('--config',
                         default=DEFAULT_SETTINGS_FILE,
                         help="Application config file")
@@ -27,6 +32,12 @@ def main():
                         help="Number of rows/batch sent to the server")
 
     args = parser.parse_args()
+
+    if args.version:
+        import sys
+        print("olass, version {}".format(__version__))
+        sys.exit()
+
     app = OlassClient(config_file=args.config,
                       interactive=args.interactive,
                       rows_per_batch=args.rows)
