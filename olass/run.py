@@ -16,11 +16,11 @@ DEFAULT_SETTINGS_FILE = 'config/settings.py'
 def main():
     """ Read args """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--version",
+    parser.add_argument("-v", "--version",
                         default=False,
                         action='store_true',
                         help="Show the version number")
-    parser.add_argument('--config',
+    parser.add_argument("-c", "--config",
                         default=DEFAULT_SETTINGS_FILE,
                         help="Application config file")
     parser.add_argument('--interactive',

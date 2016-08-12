@@ -154,7 +154,7 @@ def clean(ctx):
     ctx.run('find . -type f -name "*.pyc" -print | xargs rm -f')
     ctx.run('rm -rf htmlcov/ .coverage pylint.out')
     ctx.run('rm -rf .tox/* .ropeproject/')
-    ctx.run('rm -rf out/ dist/ build/')
+    ctx.run('rm -rf out/ dist/ build/ .eggs/* olass.egg-info/*')
     ctx.run('rm -f db.sqlite')
 
 

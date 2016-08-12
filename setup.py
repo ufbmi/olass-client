@@ -22,9 +22,6 @@ setup(
     # https://github.com/pypa/setuptools_scm
     setup_requires=["setuptools_scm"],
     use_scm_version=True,
-    # packages=["olass"],
-
-    # version='0.0.1',
     packages=find_packages(exclude=['tests']),
     include_package_data=True,
     url="https://github.com/ufbmi/olass-client",
@@ -52,4 +49,21 @@ setup(
         "pytest-cov"
     ],
     test_suite="setup.olass_test_suite",
+
+    classifiers=[
+        'Development Status :: Alpha',
+        'Environment :: Console',
+        'Intended Audience :: Researchers',
+        'License :: OSI Approved :: MIT',
+        'Operating System :: POSIX',
+        'Operating System :: Unix',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Topic :: Research :: PHI',
+],
+
 )
