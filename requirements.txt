@@ -4,6 +4,7 @@ mock
 mysql-connector
 pytest-cov
 pylint
+requests
 requests-oauthlib
 setuptools-scm
 SQLAlchemy

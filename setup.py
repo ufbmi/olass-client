@@ -36,9 +36,12 @@ def load_requirements():
 
 
 # Configure the package build and distribution
-# @see https://github.com/pypa/setuptools_scm
+#   @see https://github.com/pypa/setuptools_scm
+#   @see http://stackoverflow.com/questions/14399534/how-can-i-reference-requirements-txt-for-the-install-requires-kwarg-in-setuptool  # NOQA
+#
 # To record the files created use:
 #   python setup.py install --record files.txt
+
 setup(
     name="olass",
 
