@@ -39,6 +39,7 @@ setup(
         "mysql-connector",
         "requests-oauthlib",
         "SQLAlchemy",
+        "setuptools_scm"
     ],
     entry_points={
         "console_scripts": [

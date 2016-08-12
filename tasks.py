@@ -103,8 +103,8 @@ def test(ctx):
 @task(aliases=['cov'])
 def coverage(ctx):
     """ Create coverage report """
-    ctx.run('PYTHONPATH="." py.test --tb=short -s --cov olass '
-            ' --cov-report term-missing tests/')
+    ctx.run('PYTHONPATH="." py.test -v --tb=short -s tests/ --color=yes'
+            ' --cov olass --cov-config tests/.coveragerc')
 
 
 @task(aliases=['cov_html'])

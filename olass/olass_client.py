@@ -14,6 +14,8 @@ import os
 import sys
 import json
 import requests
+import logging
+
 from datetime import datetime
 from sqlalchemy import text
 
@@ -24,9 +26,11 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from olass import utils
 from olass import rules
+from olass.config import Config
 from olass.models import base
 from olass.models.patient import Patient
-import logging
+from olass.version import __version__
+
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -62,7 +66,7 @@ class OlassClient():
         """
         Setup the database connection obtain an access token
         """
-        from olass.config import Config
+        self.show_logo()
         self.config = Config(
             root_path=root_path,
             defaults=default_config)
@@ -146,7 +150,7 @@ class OlassClient():
         return token
 
     @staticmethod
-    def get_patient_data(session, rows_per_batch, hashing_rules):
+    def get_patient_data(session, rows_per_batch, hashing_rules, salt):
         """
         Find patients without `linkage_uuid` and hash their data
 
@@ -164,7 +168,7 @@ class OlassClient():
             Patient.pat_last_name.isnot(None),
             Patient.linkage_uuid.is_(None)
         ).limit(rows_per_batch)
-        return rules.prepare_patients(patients, hashing_rules)
+        return rules.prepare_patients(patients, hashing_rules, salt)
 
     @staticmethod
     def save_response_json(session, patient_map, json_data):
@@ -255,7 +259,8 @@ class OlassClient():
         patient_map, patient_hashes = OlassClient.get_patient_data(
             self.session,
             self.config.get('ROWS_PER_BATCH'),
-            self.config.get('ENABLED_RULES')
+            self.config.get('ENABLED_RULES'),
+            self.config.get('SALT')
         )
         log.info('Batch [{} out of {}] got hashes for [{}] patients'
                  .format(batch, batch_count, len(patient_hashes)))
@@ -298,3 +303,14 @@ class OlassClient():
             log.info("All done!")
         else:
             log.info("Fail!")
+
+    def show_logo(self):
+        """ show a figlet... """
+        print("""
+  ___  _        _    ____ ____
+ / _ \| |      / \  / ___/ ___|  __   __
+| | | | |     / _ \ \___ \___ \  \ \ / /+======
+| |_| | |___ / ___ \ ___) |__) |  \ V / # {}
+ \___/|_____/_/   \_\____/____/    \_/  +======
+
+""".format(__version__))

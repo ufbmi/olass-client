@@ -1,3 +1,10 @@
+# OLASS Client
+
+| Branch | [Travis-CI](https://travis-ci.org/ufbmi/olass-client/builds) | [Coveralls](https://coveralls.io/github/ufbmi/olass-client) |
+| :----- | :---------------------------: | :-------: |
+| [Master](https://github.com/ufbmi/olass-client/tree/master) | [![Master](https://travis-ci.org/ufbmi/olass-client.svg?branch=master)](https://travis-ci.org/ufbmi/olass-client) | [![Coverage Status](https://coveralls.io/repos/github/indera/olass-client/badge.svg?branch=master)](https://coveralls.io/github/indera/olass-client?branch=master)
+| [Develop](https://github.com/ufbmi/olass-client/tree/develop) | [![Develop](https://travis-ci.org/ufbmi/olass-client.svg?branch=develop)](https://travis-ci.org/ufbmi/olass-client) | [Master](https://github.com/ufbmi/olass-client/tree/master) | [![Master](https://travis-ci.org/ufbmi/olass-client.svg?branch=master)](https://travis-ci.org/ufbmi/olass-client) | [![Coverage Status](https://coveralls.io/repos/github/indera/olass-client/badge.svg?branch=develop)](https://coveralls.io/github/indera/olass-client?branch=develop)
+
 # Introduction
 
 This repo stores the code for the OneFlorda Linkage Submission System (OLASS)

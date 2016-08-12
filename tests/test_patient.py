@@ -55,24 +55,26 @@ class TestPatient(BaseTestCase):
         hashing_rules = ['F_L_D_Z', 'L_F_D_Z', 'F_L_D_C', 'L_F_D_C']
         required_attr = ['pat_last_name', 'pat_first_name',
                          'pat_address_zip', 'pat_birth_date']
+        salt = 'himalayan_salt'
 
         for count, patient in enumerate(patients):
             norm_patient = NormalizedPatient(patient)
-            pat_hashes = rules.get_hashes(norm_patient, hashing_rules)
+            pat_hashes = rules.get_hashes(norm_patient, hashing_rules, salt)
             self.assertIs(len(pat_hashes), 2)
             print('==> {} Check has {} values for {}'
                   .format(count, required_attr, norm_patient))
             self.assertTrue(norm_patient.has_all_data(required_attr))
 
         patient_map, patient_hashes = rules.prepare_patients(patients,
-                                                             hashing_rules)
+                                                             hashing_rules,
+                                                             salt)
         self.assertIsNotNone(patient_map)
         self.assertIsNotNone(patient_hashes)
         one_patient_hashes = patient_hashes.get('0')
         hash_0 = one_patient_hashes.get('0')
         hash_1 = one_patient_hashes.get('1')
-        self.assertEqual(hash_0, 'beba2cd1a2644b44a44a5fb65cb42d22ea7a5cc3f245fc0816f3da5969a31415')  # NOQA
-        self.assertEqual(hash_1, '4d4daf6e6c11770607199f269535e80b2034e184477c8cec5edc40539ddeaf41')  # NOQA
+        self.assertEqual(hash_0, 'df8ea7e428b3acf3379436a26e070fed65d0adad80e03cc87c84e82309fc3554')  # NOQA
+        self.assertEqual(hash_1, '83293e03c1c00ff49abb0ed5900470942bdf41750e3956135308da40771b692b')  # NOQA
 
         # Test pagination methods
         # pagination = Patient.query.order_by(
