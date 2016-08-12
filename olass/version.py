@@ -1,9 +1,9 @@
 """
 Goal: provide access to the version information
 """
-import pkg_resources
 
 try:
+    import pkg_resources
     __version__ = pkg_resources.require("olass")[0].version
 except Exception:
     from setuptools_scm import get_version
