@@ -139,7 +139,7 @@ def pypi_register(ctx):
 def pypi_upload(ctx):
     """ Use the ~/.pypirc config to upload the package """
     ctx.run("which twine || pip install twine")
-    ctx.run("python setup.py sdist --formats=zip")
+    ctx.run("python setup.py sdist --formats=zip bdist_wheel")
     ctx.run("twine upload dist/* -r olass")
     print("Done. To test please run: "
           "virtualenv venv && source venv/bin/activate "

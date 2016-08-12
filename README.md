@@ -2,19 +2,19 @@
 
 | Branch | [Travis-CI](https://travis-ci.org/ufbmi/olass-client/builds) | [Coveralls](https://coveralls.io/github/ufbmi/olass-client) |
 | :----- | :---------------------------: | :-------: |
-| [Master](https://github.com/ufbmi/olass-client/tree/master) | [![Master](https://travis-ci.org/ufbmi/olass-client.svg?branch=master)](https://travis-ci.org/ufbmi/olass-client) | [![Coverage Status](https://coveralls.io/repos/github/indera/olass-client/badge.svg?branch=master)](https://coveralls.io/github/indera/olass-client?branch=master)
-| [Develop](https://github.com/ufbmi/olass-client/tree/develop) | [![Develop](https://travis-ci.org/ufbmi/olass-client.svg?branch=develop)](https://travis-ci.org/ufbmi/olass-client) | [![Coverage Status](https://coveralls.io/repos/github/indera/olass-client/badge.svg?branch=develop)](https://coveralls.io/github/indera/olass-client?branch=develop)
+| [Master](https://github.com/ufbmi/olass-client/tree/master) | [![Master](https://travis-ci.org/ufbmi/olass-client.svg?branch=master)](https://travis-ci.org/ufbmi/olass-client) | [![Coverage Status](https://coveralls.io/repos/github/ufbmi/olass-client/badge.svg?branch=master)](https://coveralls.io/github/ufbmi/olass-client?branch=master)
+| [Develop](https://github.com/ufbmi/olass-client/tree/develop) | [![Develop](https://travis-ci.org/ufbmi/olass-client.svg?branch=develop)](https://travis-ci.org/ufbmi/olass-client) | [![Coverage Status](https://coveralls.io/repos/github/ufbmi/olass-client/badge.svg?branch=develop)](https://coveralls.io/github/ufbmi/olass-client?branch=develop)
 
-# Introduction
 
-This repo stores the code for the OneFlorda Linkage Submission System (OLASS)
-client application.
+OneFlorda Linkage Submission System (OLASS) client software
+<https://github.com/ufbmi/olass-client> is designed to compute hashes of the
+specific patient data elements and submit them to the OLASS server
+<https://github.com/ufbmi/olass-server> to achieve de-duplication.
 
-The goal of the OLASS client is to compute hashes of the patient data elements
-and submit them to the OLASS server to achieve de-duplication.
-The client obtains an access token from the server, submits json data
-to the `/api/save` endpoint, and receives back an unique identifier (UUID)
-for each patient.
+The client authorizes using the OAuth2 protocol on the server, submits the
+hashes, and receives back an uniqueidentifier (UUID) for each patient.
+The UUID is used later for submission of medical records such as
+demographics, procedures, diagnoses, vitals, lab results.
 
 
 # Authentication
