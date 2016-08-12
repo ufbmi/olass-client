@@ -76,7 +76,7 @@ def go(ctx):
     """
     Start the app
     """
-    ctx.run('python run.py')
+    ctx.run('PYTHONPATH=. python olass/run.py')
 
 
 @task()
