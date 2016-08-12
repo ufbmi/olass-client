@@ -1,5 +1,5 @@
 """
-Goal: provide access to the version of the installed package.
+Goal: provide access to the version information
 """
 import pkg_resources
 
