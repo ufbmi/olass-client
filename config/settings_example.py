@@ -1,5 +1,10 @@
 """
-Goal: store application settings
+Goal: store application settings.
+
+Notes:
+-   This file serves as an example only and should be changed
+    for production deployments.
+-   The *SALT* value will be provided over the phone.
 """
 
 # Set to False if the a target server has a self-signed certificate
@@ -17,6 +22,10 @@ DB_PORT = 3306
 DB_NAME = 'olassc'
 DB_USER = 'olassc'
 DB_PASS = 'insecurepassword'
+
+# TODO: add check for allowed salt length to detect misconfigurations
+# Derived from 'himalayan_salt'
+SALT = '5ce3c76fae7161e7d45a5c96fb6a2b2131134af739fc1c85465e659aded4e431'
 
 # Partners should only add/remove elements to this array
 # to activate/deactivate hashing rules

@@ -45,14 +45,16 @@ class Patient(CRUDMixin, DeclarativeBase):
     linkage_uuid = db.Column('linkage_uuid', db.Binary)
     linkage_added_at = db.Column('linkage_added_at', db.DateTime)
 
-    # Mandatory columns
+    # used columns
+    pat_gender = db.Column('gender', db.Text)
     pat_birth_date = db.Column('pat_birth_date', db.DateTime, nullable=False)
     pat_first_name = db.Column('pat_first_name', db.Text, nullable=False)
     pat_last_name = db.Column('pat_last_name', db.Text, nullable=False)
+
+    pat_address_city = db.Column('pat_address_city', db.Text)
+    pat_address_zip = db.Column('pat_address_zip', db.Text)
 
     # Optional columns
     pat_middle_name = db.Column('pat_middle_name', db.Text)
     pat_address_line1 = db.Column('pat_address_line1', db.Text)
     pat_address_line2 = db.Column('pat_address_line2', db.Text)
-    pat_address_city = db.Column('pat_address_city', db.Text)
-    pat_address_zip = db.Column('pat_address_zip', db.Text)
