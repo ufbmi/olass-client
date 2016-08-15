@@ -1,48 +1,37 @@
-# Pre-requisites
+# Installation pre-requisites
 
-- access credentials for the MySQL or MSSQL database
-- access credentials (`client_id`, `client_secret`) for accessing the OLASS server
-- installed python >= 3.4
-- a working python package manager (pip)
+Each installation of the OLASS client will need access to a local database
+with patient information. University of Florida will provide additional
+configuration parameters required for sending hashed data to the OLASS server
+component deployed at UF's data center.
 
+Below is the list of required parameters:
 
-# Installation Steps - RedHat Linux
-
-- create a folder for storing dependencies
-
-        $ mkdir ~/.virtualenvs
-
-- install the helper tool for isolating the installation files
-
-        $ pip install virtualenvwrapper
-
-- activate the isolation environment
-
-        $ export WORKON_HOME=$HOME/.virtualenvs
-        $ source /usr/local/bin/virtualenvwrapper.sh
-        $ mkvirtualenv olass -p /usr/local/bin/python3
-
-- install the software
-
-        $ pip install olass
-
-- create a directory for storing configuration and log files
-
-        $ mkdir -p ~/olass/logs
-
-- create a config file by using the [`settings_example.py`](https://github.com/ufbmi/olass-client/blob/master/config/settings_example.py) file as a template
-
-        $ cp config/settings_example.py ~/olass/settings.py
-
-- edit the config file (add the proper values)
-
-        $ vim ~/olass/settings.py
-
-- run the software
-
-        $ olass -c ~/olass/settings.py
+- access credentials and the ip address for the MySQL or MSSQL database server
+        `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS`
+- access credentials for the server
+        `CLIENT_ID`, `CLIENT_SECRET`
+- the OLASS server endpoint addresses:
+        `TOKEN_URL`, `SAVE_URL`
+- data parsing parameters:
+        `SALT`, `ENABLED_RULES`
 
 
-# Installation Steps - Windows
+# RedHat Linux
 
-@TODO
+For installation instructions specific to RedHat Linux please
+follow the steps from [docs/installation-redhat.md](docs/installation-redhat.md)
+
+
+# Windows
+
+For installation instructions specific to Windows please
+follow the steps from [docs/installation-windows.md](docs/installation-windows.md)
+
+
+# Help with installation
+
+If you encounter any issuse or have suggestions for improving the installation
+instructions please send us an email at <pre>bmi-developers [*at*] ad.ufl.edu </pre>
+
+We appreciate your feedback.
