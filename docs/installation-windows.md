@@ -3,7 +3,7 @@
 # Pre-requisites
 
 Please see the details about what you need to prepare before proceeding with
-the application installation at [docs/installation.md](docs/installation.md)
+the application installation at [installation.md](installation.md)
 
 
 - download and install the latest python 3 release (python >= 3.4) from 

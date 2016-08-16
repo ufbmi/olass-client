@@ -20,13 +20,13 @@ Below is the list of required parameters:
 # RedHat Linux
 
 For installation instructions specific to RedHat Linux please
-follow the steps from [docs/installation-redhat.md](docs/installation-redhat.md)
+follow the steps from [installation-redhat.md](installation-redhat.md)
 
 
 # Windows
 
 For installation instructions specific to Windows please
-follow the steps from [docs/installation-windows.md](docs/installation-windows.md)
+follow the steps from [installation-windows.md](installation-windows.md)
 
 
 # Help with installation

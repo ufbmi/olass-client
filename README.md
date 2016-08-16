@@ -38,7 +38,16 @@ library and it follows the "client credentials" grant workflow described in the
 
 This project is covered by the [MIT License](LICENSE).
 
-## Contributors
+
+# Installation
+
+The client application depends on proper configuration in order to interact
+with the [olass-server](https://github.com/ufbmi/olass-server).
+For more details please refer to the
+[docs/installation.md](docs/installation.md)
+
+
+# Contributors
 
 The application was designed and implemented by Andrei Sura with tremendous
 support, fedback and contributions from the

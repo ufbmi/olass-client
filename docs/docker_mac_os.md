@@ -1,7 +1,6 @@
-
 # Docker on MacOS
 
-- Creaate a virtualbox machine
+- Create a virtualbox machine
 (since MacOS cannot directly run the containers)
 
         $ brew install docker docker-machine docker-compose

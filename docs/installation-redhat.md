@@ -3,7 +3,7 @@
 # Pre-requisites
 
 Please see the details about what you need to prepare before proceeding with
-the application installation at [docs/installation.md](docs/installation.md).
+the application installation at [installation.md](installation.md)
 
 
 # Installation using virtualenv
@@ -17,7 +17,7 @@ Python environments.
        $  yum install python34-devel.x86_64
 
 - install the python package manager (pip)
-    
+
         $ yum install pip
 
 - create a folder for storing dependencies
@@ -58,7 +58,8 @@ file as a template
 
 # Installation using Docker
 
-Docker is a [software container](https://docs.docker.com/docker-for-windows/) used for automated deployment of Linux applications.
+Docker is a [software container](https://docs.docker.com/docker-for-windows/)
+used for automated deployment of Linux applications.
 
 
 - install Docker and start the daemon
