@@ -76,7 +76,7 @@ def go(ctx):
     """
     Start the app
     """
-    ctx.run('python run.py')
+    ctx.run('PYTHONPATH=. python olass/run.py')
 
 
 @task()
@@ -96,14 +96,16 @@ def lint(ctx):
 
 @task
 def test(ctx):
-    """ Run tests """
-    ctx.run('PYTHONPATH="." py.test -v --tb=short -s tests/ --color=yes')
+    """ Run tests
+    -s: shows details
+    """
+    ctx.run('PYTHONPATH="." py.test -v -s --tb=short tests/ --color=yes')
 
 
 @task(aliases=['cov'])
 def coverage(ctx):
     """ Create coverage report """
-    ctx.run('PYTHONPATH="." py.test -v --tb=short -s tests/ --color=yes'
+    ctx.run('PYTHONPATH="." py.test -v -s --tb=short tests/ --color=yes'
             ' --cov olass --cov-config tests/.coveragerc')
 
 
@@ -139,7 +141,7 @@ def pypi_register(ctx):
 def pypi_upload(ctx):
     """ Use the ~/.pypirc config to upload the package """
     ctx.run("which twine || pip install twine")
-    ctx.run("python setup.py sdist --formats=zip")
+    ctx.run("python setup.py sdist --formats=zip bdist_wheel")
     ctx.run("twine upload dist/* -r olass")
     print("Done. To test please run: "
           "virtualenv venv && source venv/bin/activate "
@@ -154,7 +156,7 @@ def clean(ctx):
     ctx.run('find . -type f -name "*.pyc" -print | xargs rm -f')
     ctx.run('rm -rf htmlcov/ .coverage pylint.out')
     ctx.run('rm -rf .tox/* .ropeproject/')
-    ctx.run('rm -rf out/ dist/ build/')
+    ctx.run('rm -rf ./dist ./build ./.eggs ./olass.egg-info')
     ctx.run('rm -f db.sqlite')
 
 

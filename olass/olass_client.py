@@ -52,6 +52,11 @@ log.debug("logging was configured...")
 # alog.setLevel(logging.INFO)
 
 TOKEN_REQUEST_ATTEMPTS = 3
+EXPECTED_SALT_LENGTH = 64
+
+
+class ConfigErr(Exception):
+    pass
 
 
 class OlassClient():
@@ -67,13 +72,12 @@ class OlassClient():
         Setup the database connection obtain an access token
         """
         self.show_logo()
-        self.config = Config(
-            root_path=root_path,
-            defaults=default_config)
+        self.config = Config(root_path=root_path, defaults=default_config)
         self.config.from_pyfile(config_file)
+        log.info("Load config file: {}".format(config_file))
         self.update_config(interactive=interactive,
                            rows_per_batch=rows_per_batch)
-        self.validate_config_rules()
+        self.validate_config()
         self.engine = utils.get_db_engine(self.config)
         self.session = OlassClient.get_db_session(self.engine, create_tables)
         # self.config.from_object(some_module.DefaultConfig)
@@ -93,10 +97,50 @@ class OlassClient():
         self.config['INTERACTIVE'] = interactive
         self.config['ROWS_PER_BATCH'] = rows_per_batch
 
-    def validate_config_rules(self):
+    def validate_config(self):
+        """
+        Check for required arguments.
+        """
+        # TODO: perhaps add a generic function for checking and a array
+        # of expected variables
+
+        if not self.config.get('CLIENT_ID'):
+            raise ConfigErr("Please add config param 'CLIENT_ID'")
+
+        if not self.config.get('CLIENT_SECRET'):
+            raise ConfigErr("Please add config param 'CLIENT_SECRET'")
+
+        if not self.config.get('TOKEN_URL'):
+            raise ConfigErr("Please add config param 'TOKEN_URL'")
+
+        if not self.config.get('SAVE_URL'):
+            raise ConfigErr("Please add config param 'SAVE_URL'")
+
+        if not self.config.get('DB_HOST'):
+            raise ConfigErr("Please add config param 'DB_HOST'")
+
+        if not self.config.get('DB_PORT'):
+            raise ConfigErr("Please add config param 'DB_PORT'")
+
+        if not self.config.get('DB_USER'):
+            raise ConfigErr("Please add config param 'DB_USER'")
+
+        if not self.config.get('DB_PASS'):
+            raise ConfigErr("Please add config param 'DB_PASS'")
+
+        if not self.config.get('SALT'):
+            raise ConfigErr("Please add config param 'SALT'")
+
+        if len(self.config.get('SALT')) != EXPECTED_SALT_LENGTH:
+            raise ConfigErr("Please add config param 'SALT' ({} characters)"
+                            .format(EXPECTED_SALT_LENGTH))
+
+        if not self.config.get('ENABLED_RULES'):
+            raise ConfigErr("Please add config array 'ENABLED_RULES'")
+
         for rule_code in self.config.get('ENABLED_RULES'):
             if rule_code not in rules.AVAILABLE_RULES_MAP:
-                raise Exception('Invalid rule code: [{}]! '
+                raise ConfigErr('Invalid rule code: [{}]! '
                                 'Available codes are: {}'
                                 .format(rule_code, rules.AVAILABLE_RULES_MAP))
 
@@ -107,7 +151,7 @@ class OlassClient():
 
         :param create_tables: boolean used to request table creation
         """
-        log.info("Call get_db_session()")
+        log.debug("Call get_db_session()")
         base.init(engine)
         session = base.DBSession()
 

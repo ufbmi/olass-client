@@ -23,7 +23,7 @@ DB_NAME = 'olassc'
 DB_USER = 'olassc'
 DB_PASS = 'insecurepassword'
 
-# TODO: add check for allowed salt length to detect misconfigurations
+# Expected length: 64 characters
 # Derived from 'himalayan_salt'
 SALT = '5ce3c76fae7161e7d45a5c96fb6a2b2131134af739fc1c85465e659aded4e431'
 
