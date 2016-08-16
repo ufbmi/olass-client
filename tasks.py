@@ -96,14 +96,16 @@ def lint(ctx):
 
 @task
 def test(ctx):
-    """ Run tests """
-    ctx.run('PYTHONPATH="." py.test -v --tb=short -s tests/ --color=yes')
+    """ Run tests
+    -s: shows details
+    """
+    ctx.run('PYTHONPATH="." py.test -v -s --tb=short tests/ --color=yes')
 
 
 @task(aliases=['cov'])
 def coverage(ctx):
     """ Create coverage report """
-    ctx.run('PYTHONPATH="." py.test -v --tb=short -s tests/ --color=yes'
+    ctx.run('PYTHONPATH="." py.test -v -s --tb=short tests/ --color=yes'
             ' --cov olass --cov-config tests/.coveragerc')
 
 

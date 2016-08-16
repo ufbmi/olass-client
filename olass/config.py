@@ -59,3 +59,11 @@ class Config(dict):
         for key in dir(obj):
             if key.isupper():
                 self[key] = getattr(obj, key)
+
+    def from_dictionary(self, dictionary):
+        """
+        Helper function for overriding config values
+        """
+        for key, value in dictionary.items():
+            if key.isupper():
+                self[key] = value
