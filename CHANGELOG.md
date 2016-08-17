@@ -1,6 +1,11 @@
 # Change Log
 
 
+## [0.0.3a] - 2016-08-17
+
+### Added
+* add misc fixes to build and deploy tasks
+
 ## [0.0.3] - 2016-08-16
 
 ### Added
