@@ -20,10 +20,9 @@ mock-*
 .coveralls.yml
 coverage.json
 pylint.out
-
 db.sqlite
-
 /config/settings.py
+/deploy/settings.py
 /dist
 /build
-.coveralls.yml
+/BUILT_WHEELS

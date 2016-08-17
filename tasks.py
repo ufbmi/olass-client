@@ -23,7 +23,7 @@ def list(ctx):
 @task
 def prep_develop(ctx):
     """ Install the requirements """
-    ctx.run('pip install -r requirements.txt')
+    ctx.run('pip install -U -r requirements.txt')
     print("==> Pip packages installed:")
     ctx.run('pip freeze')
 
@@ -144,8 +144,21 @@ def pypi_upload(ctx):
     ctx.run("python setup.py sdist --formats=zip bdist_wheel")
     ctx.run("twine upload dist/* -r olass")
     print("Done. To test please run: "
-          "virtualenv venv && source venv/bin/activate "
-          "&& pip install olass && olass")
+          "python -m virtualenv venv "
+          " && source ./venv/bin/activate "
+          " && pip install olass && olass -v")
+
+
+@task
+def pypi_wheel(ctx):
+    """
+    Download all `wheel` packages
+    If the target machine has no access to internet we can: build, ship, install
+        pip wheel -r requirements-to-freeze.txt -w BUILT_WHEELS
+        scp -r BUILT_WHEELS production_server:WHEE
+        pip install -r requirements-to-freeze.txt --no-index --find-links WHEE
+    """
+    ctx.run('pip wheel olass -r requirements-to-freeze.txt -w BUILT_WHEELS')
 
 
 @task
@@ -156,7 +169,7 @@ def clean(ctx):
     ctx.run('find . -type f -name "*.pyc" -print | xargs rm -f')
     ctx.run('rm -rf htmlcov/ .coverage pylint.out')
     ctx.run('rm -rf .tox/* .ropeproject/')
-    ctx.run('rm -rf ./dist ./build ./.eggs ./olass.egg-info')
+    ctx.run('rm -rf ./dist ./build ./.eggs ./olass.egg-info ./BUILT_WHEELS')
     ctx.run('rm -f db.sqlite')
 
 

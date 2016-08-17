@@ -31,18 +31,20 @@ RUN apt-get install -y libmysqlclient-dev mysql-client
 
 # Install python
 RUN apt-get install -y python3-dev python3-pip python3-setuptools
-RUN pip3 install --upgrade pip requests
+RUN pip3 install --upgrade pip requests virtualenv
 
-# Install OLASS client
+# Go to the working folder
+WORKDIR /olass
+
+# Install OLASS client in a virtual environment
 RUN which -a python3
 RUN python3 --version
-RUN pip3 install olass
+RUN python3 -m virtualenv venv
+RUN . ./venv/bin/activate
+RUN pip3 install -U olass
 
 # Copy the config file from the host to the container
-ADD ./settings.py /olass/settings.py
-
-# Go to the app folder
-WORKDIR /olass
+ADD ./settings.py settings.py
 
 # Run the app
 CMD olass --config settings.py
