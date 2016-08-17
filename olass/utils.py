@@ -98,10 +98,6 @@ def get_db_engine(config):
         log.warning("Got exc from db.create_engine(): {}".format(exc))
         engine = db.create_engine(url, echo=False)
 
-    try:
-        engine.execute("USE {}".format(db_name))
-    except db.exc.OperationalError:
-        log.warning('Cannot select [{}] database.'.format(db_name))
     return engine
 
 

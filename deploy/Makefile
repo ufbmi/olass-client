@@ -18,7 +18,7 @@ build:
 	docker build -t olass-docker .
 
 run:
-	docker run --rm -it olass-docker
+	docker run --rm -it olass-docker bash -c "olass --config settings.py"
 
 id:
 	@docker ps -aq --filter=image=olass-docker --filter=status=running
