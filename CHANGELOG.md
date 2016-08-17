@@ -1,19 +1,10 @@
 # Change Log
 
 
-## [0.0.3b] - 2016-08-17
-
-### Fixed
-* setup.py
-
-## [0.0.3a] - 2016-08-17
+## [0.0.3] - 2016-08-17
 
 ### Added
-* add misc fixes to build and deploy tasks
-
-## [0.0.3] - 2016-08-16
-
-### Added
+* Add misc fixes to build and deploy tasks
 * Add `validate_config` to check every config parameter
 * Add `requests` as a requrement to fix a container deployment issue
 * Add installation docs
