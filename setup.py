@@ -61,20 +61,20 @@ setup(
     install_requires=load_requirements(),
     # tests_require=["mock", "pytest-cov"],  # requirements included above
     test_suite="setup.olass_test_suite",
+
+    # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
-        'Development Status :: Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
-        'Intended Audience :: Biomedical Researchers',
-        'License :: OSI Approved :: MIT',
-        'Operating System :: POSIX',
-        'Operating System :: Unix',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
+        'Operating System :: POSIX',
+        'Operating System :: Unix',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
-        'Topic :: Research :: PHI',
+        'Topic :: Scientific/Engineering :: Medical Science Apps.',
     ],
 
     entry_points={
