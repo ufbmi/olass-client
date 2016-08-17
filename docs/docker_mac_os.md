@@ -18,14 +18,18 @@
         export DOCKER_HOST="tcp://192.168.99.100:2376"
         export DOCKER_CERT_PATH="/Users/asura/.docker/machine/machines/olass-machine"
         export DOCKER_MACHINE_NAME="olass-machine"
-        # Run this command to configure your shell:
-        # eval $(docker-machine env olass-machine)
+
+- Run this command to configure your shell:
 
         $ eval $(docker-machine env olass-machine)
 
 - Run the example
 
         $ docker run hello-world
+
+- If the machine fails:
+
+        $ docker-machine rm olass-machine
 
 
 # Connect from the docker (aka guest) to MySQL running on the host
